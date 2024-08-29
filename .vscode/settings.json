@@ -1,0 +1,31 @@
+{
+    "files.associations": {
+        "iostream": "cpp"
+    },
+    "C_Cpp.codeAnalysis.clangTidy.enabled": false,
+    "C_Cpp.default.cppStandard": "c++14",
+    "C_Cpp.default.cStandard": "c11",
+    "C_Cpp.doxygen.generatedStyle": "/**",
+    "C_Cpp.autoAddFileAssociations": false,
+    "editor.rulers": [
+        80
+    ],
+    "C_Cpp.vcFormat.space.pointerReferenceAlignment": "left",
+    "C_Cpp.formatting": "vcFormat",
+    "C_Cpp.vcFormat.newLine.scopeBracesOnSeparateLines": true,
+    "C_Cpp.vcFormat.newLine.beforeOpenBrace.type": "newLine",
+    "C_Cpp.vcFormat.newLine.beforeOpenBrace.block": "newLine",
+    "C_Cpp.vcFormat.indent.preserveWithinParentheses": true,
+    "C_Cpp.vcFormat.indent.preprocessor": "oneLeft",
+    "C_Cpp.errorSquiggles": "enabled",
+    "cmake.generator": "Unix Makefiles",
+    "cmake.sourceDirectory": "${workspaceFolder}",
+    "cmake.buildDirectory": "${workspaceFolder}/build",
+    "cmake.debugConfig": {
+        "cwd": "${workspaceFolder}"
+    },
+    "cmake.configureArgs": [
+        "-DTEST=ON",
+        "-DCMAKE_BUILD_TYPE=Debug"
+    ]
+}
