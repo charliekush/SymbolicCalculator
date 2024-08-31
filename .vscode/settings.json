@@ -3,8 +3,8 @@
         "iostream": "cpp"
     },
     "C_Cpp.codeAnalysis.clangTidy.enabled": false,
-    "C_Cpp.default.cppStandard": "c++14",
-    "C_Cpp.default.cStandard": "c11",
+    "C_Cpp.default.cppStandard": "c++17",
+    "C_Cpp.default.cStandard": "c17",
     "C_Cpp.doxygen.generatedStyle": "/**",
     "C_Cpp.autoAddFileAssociations": false,
     "editor.rulers": [
@@ -27,5 +27,25 @@
     "cmake.configureArgs": [
         "-DTEST=ON",
         "-DCMAKE_BUILD_TYPE=Debug"
+    ],
+    "autoSnippet.snippets": [
+
+        {
+            "pattern": "**/*.h",
+            "snippet": "header-template"
+        },
+        {
+            "pattern": "**/*.hpp",
+            "snippet": "header-template"
+        }
+    ],
+    "doxdocgen.generic.authorEmail": "charliekushelevsky@gmail.com",
+    "doxdocgen.generic.authorName": "Charles Kushelevsky",
+    "doxdocgen.file.fileOrder": [
+        "file",
+        "author",
+        "brief",
+        "version",
+        "date"
     ]
 }

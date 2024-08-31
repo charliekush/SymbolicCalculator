@@ -1,7 +1,7 @@
 {
     "configurations": [
         {
-            "name": "Google Tests Debugger",
+            "name": "Main Debugger",
             "type": "cppdbg",
             "request": "launch",
             "program": "${command:cmake.launchTargetPath}",
