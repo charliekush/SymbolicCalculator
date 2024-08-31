@@ -34,7 +34,7 @@ SymbolProperties::SymbolProperties(int precedence, Associativity associativity):
  * @param t The type of the token.
  * @param s The string representation of the token.
  */
-Token::Token(TokenType t, const std::string& s) : type(t), str(s) {}
+Token::Token(TokenType type, const std::string& str) : type(type), str(str) {}
 
 /**
  * @brief Constructs an Operator with a specified string and properties.
@@ -141,3 +141,8 @@ double Number::getFloat() const
 {
     return std::get<double>(value);
 }
+
+LeftParenthesis::LeftParenthesis() : Token(LEFTPAREN, "(") {};
+
+
+RightParenthesis::RightParenthesis() : Token(RIGHTPAREN, ")") {};

@@ -21,7 +21,9 @@ enum TokenType
     VARIABLE,
     OPERATOR,
     PARENTHESIS,
-    FUNCTION
+    FUNCTION,
+    LEFTPAREN,
+    RIGHTPAREN
 };
 
 enum class NumberType {
@@ -50,10 +52,10 @@ protected:
 public:
     /**
      * @brief Constructs a Token with a type and a string representation.
-     * @param t The type of the token.
-     * @param s The string representation of the token.
+     * @param type The type of the token.
+     * @param str The string representation of the token.
      */
-    Token(TokenType t, const std::string& s);
+    Token(TokenType type, const std::string& str);
 
     virtual ~Token() = default;
 
@@ -191,6 +193,29 @@ public:
 
     //! Returns the double value of the number token.
     double getFloat() const;
+};
+
+
+/**
+ * @brief Represents a left parenthesis
+ */
+class LeftParenthesis : public Token {
+public:
+    /**
+     * @brief Constructs a '(' token
+     */
+    LeftParenthesis();
+};
+
+/**
+ * @brief Represents a left parenthesis
+ */
+class RightParenthesis : public Token {
+public:
+    /**
+     * @brief Constructs a '(' token
+     */
+    RightParenthesis();
 };
 
 #endif
