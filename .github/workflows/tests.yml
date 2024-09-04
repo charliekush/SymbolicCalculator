@@ -13,11 +13,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
 
-    - name: Create folder
-      run: mkdir -p external/
-
-    - name: Initialize and update submodules (if needed)
-      run: git submodule update --init --recursive
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        submodules: recursive  
     
     - name: Set up environment
       run: |
@@ -29,4 +28,4 @@ jobs:
         cd build/
         make
         cd ..
-        ./build/googletests
+        ./build/googletests  # Replace with your actual test executable name
