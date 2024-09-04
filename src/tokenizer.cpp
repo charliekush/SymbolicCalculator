@@ -31,24 +31,24 @@ Tokenizer::Tokenizer(const std::string& input) : input(input)
 {
     
     constructTree();
-    substr = "";
-    if (!input.empty()) {
+    this->substr = "";
+    if (!this->input.empty()) {
         this->currentIndex = 0;
-        this->currentChar = input[0];
+        this->currentChar = this->input[0];
     } 
     else 
     {
         this->currentIndex = -1;
-        this->currentChar = '\0'; // Handle empty input
+        this->currentChar = '\0'; // Handle empty this->input
     }
-    this->len = input.length();
+    this->len = this->input.length();
     
 }
 
 std::vector<std::shared_ptr<Token>> Tokenizer::tokenize()
 {
     this->parseExpression();
-    return output;
+    return this->output;
 }
 void Tokenizer::constructTree()
 {
@@ -115,7 +115,7 @@ void Tokenizer::getNext()
     }
     else
     {
-        this->currentChar = this->input[currentIndex];
+        this->currentChar = this->input[this->currentIndex];
     }
 }
 
@@ -181,13 +181,13 @@ void Tokenizer::parseExpression()
         }
         else 
         {
-            this->substr += currentChar;
+            this->substr += this->currentChar;
             this->getNext();
         }
         this->checkSubstr();
     }
-    // Handle any remaining substr (if needed)
-    if (!substr.empty())
+    // Handle any remaining this->substr (if needed)
+    if (!this->substr.empty())
     {
         clearSubstr();
     }
@@ -232,20 +232,20 @@ Number Tokenizer::parseNumber()
 
 void Tokenizer::clearSubstr()
 {
-    int startIndexInInput = currentIndex - substr.length();
+    int startIndexInInput = this->currentIndex - this->substr.length();
     int matchStartInInput = startIndexInInput;
     this->checkSubstr();
     for (int idx = 0; idx < this->substr.length(); idx++)
     {
         this->checkImplicitMultiplication();
         this->output.emplace_back(std::make_shared<Variable>(
-                                                std::string(1, substr[idx])));
+                                                std::string(1, this->substr[idx])));
         
         this->getSubSript(idx);
         
         
     }
-    substr.clear();
+    this->substr.clear();
     
 }
 
@@ -262,7 +262,7 @@ void Tokenizer::checkImplicitMultiplication()
 
 void Tokenizer::checkSubstr()
 {
-    if (substr.empty())
+    if (this->substr.empty())
     {
         return;
     }
@@ -272,10 +272,10 @@ void Tokenizer::checkSubstr()
     std::string matchedString;
 
     // Traverse the substring to find the longest match in the trie
-    for (int idx = 0; idx< substr.length(); idx++)
+    for (int idx = 0; idx< this->substr.length(); idx++)
     {
         
-        char ch = substr[idx];
+        char ch = this->substr[idx];
         if (current->getChild(ch))
         {
             current = current->getChild(ch);
@@ -296,7 +296,7 @@ void Tokenizer::checkSubstr()
 
     if (lastMatchedIndex != -1) // Found a match
     {
-        int startIndexInInput = currentIndex - substr.length();
+        int startIndexInInput = this->currentIndex - this->substr.length();
         int matchStartInInput = startIndexInInput + lastMatchedIndex - 
                                                 (matchedString.length() - 1);
         // Process characters before the matched string as variables
@@ -307,7 +307,7 @@ void Tokenizer::checkSubstr()
             newVar += this->substr[idx] + 
                 this->getSubSript(startIndexInInput + idx);
             this->checkImplicitMultiplication();
-            output.emplace_back(std::make_shared<Variable>(newVar));
+            this->output.emplace_back(std::make_shared<Variable>(newVar));
             idx += newVar.length() > 0 ? newVar.length() - 1 : 0;
             if (idx > lastMatchedIndex)
             {
@@ -320,23 +320,23 @@ void Tokenizer::checkSubstr()
         if (match.first == FUNCTION)
         {
             this->checkImplicitMultiplication();
-            output.emplace_back(std::make_shared<Function>(matchedString));
+            this->output.emplace_back(std::make_shared<Function>(matchedString));
         }
         else if (match.first == OPERATOR)
         {
-            output.emplace_back(std::make_shared<Operator>(matchedString));
+            this->output.emplace_back(std::make_shared<Operator>(matchedString));
         }
         else if (match.first == LEFTPAREN)
         {
             this->checkImplicitMultiplication();
-            output.emplace_back(std::make_shared<LeftParenthesis>());
+            this->output.emplace_back(std::make_shared<LeftParenthesis>());
         }
         else if (match.first == RIGHTPAREN)
         {
-            output.emplace_back(std::make_shared<RightParenthesis>());
+            this->output.emplace_back(std::make_shared<RightParenthesis>());
         }
-        // Remove processed part from substr
-        substr.erase(0, lastMatchedIndex + 1);
+        // Remove processed part from this->substr
+        this->substr.erase(0, lastMatchedIndex + 1);
     }
     
     

@@ -31,18 +31,24 @@ public:
      * @return A vector of Token objects.
      */
     std::vector<std::shared_ptr<Token>> tokenize();
-    
     //DEBUG START
     std::string listOutput();
     //DEBUG END
     
 
 private:
-    std::string input; //!< The input string to be tokenized
+    //! The input string to be tokenized
+    std::string input; 
     std::string substr;
-    size_t currentIndex; //!< The current index in the input string
-    char currentChar; //!< The current character being processed
-    int len; //!< Length of the input string
+
+    //! The current index in the input string
+    size_t currentIndex; 
+
+    //! The current character being processed
+
+    char currentChar; 
+    //! Length of the input string
+    int len; 
     std::shared_ptr<MWTNode> mwtRoot;
     std::vector<std::shared_ptr<Token>> output;
     
