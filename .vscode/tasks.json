@@ -1,9 +1,26 @@
 {
     "version": "2.0.0",
     "tasks": [
-        
-        
-        
-        
+        {
+            "label": "CMake: Build",
+            "type": "shell",
+            "command": "cmake --build ${workspaceFolder}/build --config Debug -v",
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "problemMatcher": []
+        },
+        {
+            "label": "Build Symbolic Calculator",
+            "type": "shell",
+            "command": "cmake --build ${workspaceFolder}/build",
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "dependsOn": "CMake: Build",
+            "problemMatcher": []
+        }
     ]
 }
