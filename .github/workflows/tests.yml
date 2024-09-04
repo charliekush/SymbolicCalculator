@@ -37,4 +37,4 @@ jobs:
         cd build/
         make
         cd ..
-        ./build/symbolic  # Replace with your actual test executable name
+        ./build/googletests
