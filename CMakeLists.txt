@@ -26,7 +26,7 @@ set(GTEST_SOURCE_FILES
     src/postfix.cpp
     src/token_queue.cpp
     tests/tokenizer_tests.cpp
-
+    tests/postfix_tests.cpp
     
 )
 

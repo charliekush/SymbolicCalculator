@@ -173,8 +173,7 @@ void Tokenizer::handleMinus()
         {
             this->checkImplicitMultiplication();
             this->getNext(); // Move past the '-'
-            std::shared_ptr<Number> newNum = 
-                std::make_shared<Number>(this->parseNumber());
+            std::shared_ptr<Number> newNum = std::make_shared<Number>(this->parseNumber());
             newNum->flipSign(); // Flip the sign of the number
             this->output.emplace_back(newNum);
         }

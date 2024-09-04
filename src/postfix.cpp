@@ -19,15 +19,16 @@ void ShuntingYard::convert()
     for (int idx = 0; idx < this->input.size(); idx++)
     {
         this->currentToken = this->input[idx];
+        
         if (this->currentType() == NUMBER)
         {
-            this->output.push(this->currentToken);
+                this->output.push(this->currentToken);
         }
         else if (this->currentType() == FUNCTION)
         {
             this->operators.push(this->currentToken);
         }
-        else if(this->currentType() == OPERATOR)
+        else if (this->currentType() == OPERATOR)
         {
             this->handleOperator();
         }
@@ -35,9 +36,9 @@ void ShuntingYard::convert()
         {
             this->operators.push(this->currentToken);
         }
-         else if (this->currentType() == RIGHTPAREN)
+        else if (this->currentType() == RIGHTPAREN)
         {
-            while(this->operators.top()->getType() != LEFTPAREN)
+            while (this->operators.top()->getType() != LEFTPAREN)
             {
                 if (this->operators.size() == 0)
                 {
@@ -55,7 +56,6 @@ void ShuntingYard::convert()
                 this->popToOutput();
             }
         }
-        
     }
     while (this->operators.size() > 0)
     {
@@ -65,46 +65,36 @@ void ShuntingYard::convert()
         }
         this->popToOutput();
     }
-
-    
 }
-
 
 void ShuntingYard::handleOperator()
 {
+    bool topNotLeftParen, greaterPrecedence, equalLeftAssociativity;
+    
     while (this->operators.size() > 0)
     {
-        // Get the top of the stack operator precedence and associativity
         int topPrecedence = this->operators.top()->getPrecedence();
         int currentPrecedence = this->currentToken->getPrecedence();
-        Associativity currentAssociativity = 
-            this->currentToken->getAssociativity();
+        Associativity currentAssociativity = this->currentToken->getAssociativity();
 
-        // Check if the top of the stack is not a left parenthesis
-        bool topNotLeftParen = this->operators.top()->getType() != LEFTPAREN;
+        topNotLeftParen = this->operators.top()->getType() != LEFTPAREN;
 
-        // Check if the top of the stack has greater precedence
-        bool greaterPrecedence = (topPrecedence > currentPrecedence);
+        greaterPrecedence = (topPrecedence > currentPrecedence);
 
-        // Check if the top of the stack has equal precedence and the 
-        //current token is left-associative
-        bool equalLeftAssociativity = (topPrecedence == currentPrecedence && 
-                            currentAssociativity == Associativity::LEFT);
-
-        // If conditions met pop operator to stack
-        if (topNotLeftParen && (greaterPrecedence || equalLeftAssociativity))
+        equalLeftAssociativity = (topPrecedence == currentPrecedence && currentAssociativity == Associativity::LEFT);
+        
+        if (!(topNotLeftParen && (greaterPrecedence || equalLeftAssociativity)))
         {
-            this->output.push(this->operators.top());
-            this->operators.pop();;
+            break;
         }
 
-        // Otherwise, pop the top of the stack to the output queue
-        
+        this->output.push(this->operators.top());
+        this->operators.pop();
     }
 
-    // Finally, push the current operator to the stack
     this->operators.push(this->currentToken);
 }
+
 
 
 void ShuntingYard::popToOutput()
