@@ -15,10 +15,11 @@
 #include <memory>
 #include <vector>
 
-/**
- * @brief Tokenizer class for parsing an input string into tokens.
- */
-class Tokenizer {
+ /**
+  * @brief Tokenizer class for parsing an input string into tokens.
+  */
+class Tokenizer
+{
 public:
     /**
      * @brief Constructs a Tokenizer with the given input string.
@@ -34,68 +35,68 @@ public:
     //DEBUG START
     std::string listOutput();
     //DEBUG END
-    
+
 
 private:
     //! The input string to be tokenized
-    std::string input; 
+    std::string input;
     std::string substr;
 
     //! The current index in the input string
-    size_t currentIndex; 
+    size_t currentIndex;
 
     //! The current character being processed
 
-    char currentChar; 
+    char currentChar;
     //! Length of the input string
-    int len; 
+    int len;
     std::shared_ptr<MWTNode> mwtRoot;
     std::vector<std::shared_ptr<Token>> output;
-    
+
     /**
      * @brief constructs multiway trie from symbolTable @see token.hpp
      */
     void constructTree();
-    
+
 
     /**
-     * @brief Peeks at the next character in the input string without 
+     * @brief Peeks at the next character in the input string without
      * advancing the index.
-     * @return The next character in the input string. '\0' if last character 
+     * @return The next character in the input string. '\0' if last character
      * in input.
      */
     char peek() const;
 
     /**
-     * @brief Peeks at the next character in the input string without 
+     * @brief Peeks at the next character in the input string without
      * advancing the index.
-     * @return The previous character in the input string. '\0' if first 
+     * @return The previous character in the input string. '\0' if first
      * character in input.
      */
     char peekBack() const;
 
 
     /**
-     * @brief Advances to the next character in the input string. '\0' if 
+     * @brief Advances to the next character in the input string. '\0' if
      * last character in input.
      */
     void getNext();
 
     /**
      * @brief splits substr into variables and clears substr
-     * 
+     *
      */
     void clearSubstr();
 
     /**
      * @brief checks for symbols in substr
-     * 
+     *
      */
     void checkSubstr();
-    
+
     /**
      * @brief Get the Sub Sript of a str
-     * 
+     *
      * @param idx index in the input
      * @return subscript string
      */
@@ -103,11 +104,11 @@ private:
 
     /**
      * @brief parse the expression
-     * 
-     * @return std::vector<std::shared_ptr<Token>> 
+     *
+     * @return std::vector<std::shared_ptr<Token>>
      */
-    void parseExpression(); 
-    
+    void parseExpression();
+
     void checkImplicitMultiplication();
     /**
      * @brief Parses a number token from the input string.
@@ -116,7 +117,7 @@ private:
     Number parseNumber();
 
     /**
-     * @brief Parses an identifier token (variable or function) 
+     * @brief Parses an identifier token (variable or function)
      * from the input string.
      * @return The parsed Token for the identifier.
      */
@@ -134,7 +135,13 @@ private:
      */
     Token parseParenthesis();
 
-    
+    /**
+     * @brief handles potential unary minus sign in input
+     *
+     */
+    void handleMinus();
+
+
 };
 
 #endif // __TOKENIZER_HPP__

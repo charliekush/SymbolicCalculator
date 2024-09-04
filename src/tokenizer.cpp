@@ -1,7 +1,7 @@
 /**
  * @file tokenizer.cpp
  * @author Charles Kushelevsky (charliekushelevsky@gmail.com)
- * @brief Implementation of the Tokenizer class which handles tokenizing 
+ * @brief Implementation of the Tokenizer class which handles tokenizing
  * input strings.
  * @version 0.1
  * @date 2024-08-31
@@ -10,39 +10,40 @@
 #include "tokenizer.hpp"
 #include <iostream>
 
-/**
- * @class Tokenizer
- * @brief A class that tokenizes an input string into tokens.
- * 
- * The Tokenizer class processes the input string character by character to 
- * identify and extract tokens. It keeps track of the current character and 
- * index within the input string.
- */
+ /**
+  * @class Tokenizer
+  * @brief A class that tokenizes an input string into tokens.
+  *
+  * The Tokenizer class processes the input string character by character to
+  * identify and extract tokens. It keeps track of the current character and
+  * index within the input string.
+  */
 
-/**
- * @brief Constructs a Tokenizer object with a specified input string.
- * @param input The string to be tokenized.
- * 
- * This constructor initializes the input string, sets the current index to 
- * 0, and initializes the current character to the first character of the 
- * input string. The length of the input string is also recorded.
- */
+  /**
+   * @brief Constructs a Tokenizer object with a specified input string.
+   * @param input The string to be tokenized.
+   *
+   * This constructor initializes the input string, sets the current index to
+   * 0, and initializes the current character to the first character of the
+   * input string. The length of the input string is also recorded.
+   */
 Tokenizer::Tokenizer(const std::string& input) : input(input)
 {
-    
+
     constructTree();
     this->substr = "";
-    if (!this->input.empty()) {
+    if (!this->input.empty())
+    {
         this->currentIndex = 0;
         this->currentChar = this->input[0];
-    } 
-    else 
+    }
+    else
     {
         this->currentIndex = -1;
         this->currentChar = '\0'; // Handle empty this->input
     }
     this->len = this->input.length();
-    
+
 }
 
 std::vector<std::shared_ptr<Token>> Tokenizer::tokenize()
@@ -52,14 +53,14 @@ std::vector<std::shared_ptr<Token>> Tokenizer::tokenize()
 }
 void Tokenizer::constructTree()
 {
-    this->mwtRoot = std::make_shared<MWTNode>('\0',false);
-    for (const auto &entry : symbolTable)
+    this->mwtRoot = std::make_shared<MWTNode>('\0', false);
+    for (const auto& entry : symbolTable)
     {
         // Start from the root of the trie
         std::shared_ptr<MWTNode> current = this->mwtRoot;
 
         // Traverse through the characters in the entry key
-        for (const char &letter : entry.first)
+        for (const char& letter : entry.first)
         {
             // Check if the child node exists
             std::shared_ptr<MWTNode> child = current->getChild(letter);
@@ -69,7 +70,7 @@ void Tokenizer::constructTree()
                 child = std::make_shared<MWTNode>(letter, false);
                 current->children.push_back(child);
             }
-            
+
             // Move to the child node
             current = child;
         }
@@ -134,52 +135,14 @@ void Tokenizer::parseExpression()
         {
             this->clearSubstr();
             this->getNext();
-            
+
         }
         else if (this->currentChar == '-')
         {
-            this->clearSubstr();
-            // Check if '-' is followed by a number (handling unary minus)
-            bool lastWasOperator = false;
-            if (symbolTable.find(std::string(1,this->peekBack())) 
-                        != symbolTable.end())
-            {
-                lastWasOperator = 
-                (symbolTable[std::string(1,this->peekBack())].first 
-                == OPERATOR) ||
-                (symbolTable[std::string(1,this->peekBack())].first 
-                == LEFTPAREN);
-                
-            }
-            if (this->peekBack() == '\0' || lastWasOperator )
-            {
-                // Peek the next character to see if it's a number
-                if (this->peek() >= '0' && this->peek() <= '9')
-                {
-                    this->checkImplicitMultiplication();
-                    // It's a negative number
-                    this->getNext(); // Move past the '-'
-                    std::shared_ptr<Number> newNum = 
-                        std::make_shared<Number>(this->parseNumber());
-                    newNum->flipSign(); // Flip the sign of the number
-                    this->output.emplace_back(newNum);
-                }
-                else
-                {
-                    // unary minus before a variable or expression
-                    this->substr += '-';
-                    this->getNext();
-                }
-            }
-            else
-            {
-                // Binary minus (operator)
-                this->output.emplace_back(std::make_shared<Operator>("-"));
-                this->getNext();
-            }
-            
+            this->handleMinus();
+
         }
-        else 
+        else
         {
             this->substr += this->currentChar;
             this->getNext();
@@ -192,7 +155,48 @@ void Tokenizer::parseExpression()
         clearSubstr();
     }
 }
+void Tokenizer::handleMinus()
+{
+    this->clearSubstr();
+    // Check if '-' is followed by a number (handling unary minus)
+    bool lastWasOperator = false;
+    if (symbolTable.find(std::string(1, this->peekBack()))
+                != symbolTable.end())
+    {
+        lastWasOperator =
+            (symbolTable[std::string(1, this->peekBack())].first
+            == OPERATOR) ||
+            (symbolTable[std::string(1, this->peekBack())].first
+            == LEFTPAREN);
 
+    }
+    if (this->peekBack() == '\0' || lastWasOperator)
+    {
+        // Peek the next character to see if it's a number
+        if (this->peek() >= '0' && this->peek() <= '9')
+        {
+            this->checkImplicitMultiplication();
+            // It's a negative number
+            this->getNext(); // Move past the '-'
+            std::shared_ptr<Number> newNum =
+                std::make_shared<Number>(this->parseNumber());
+            newNum->flipSign(); // Flip the sign of the number
+            this->output.emplace_back(newNum);
+        }
+        else
+        {
+            // unary minus before a variable or expression
+            this->substr += '-';
+            this->getNext();
+        }
+    }
+    else
+    {
+        // Binary minus (operator)
+        this->output.emplace_back(std::make_shared<Operator>("-"));
+        this->getNext();
+    }
+}
 Number Tokenizer::parseNumber()
 {
     std::string numberStr;
@@ -202,7 +206,7 @@ Number Tokenizer::parseNumber()
     while ((this->currentChar >= '0' && this->currentChar <= '9'))
     {
         numberStr += this->currentChar;
-        if(this->peek() == '.')
+        if (this->peek() == '.')
         {
             if (!hasDecimalPoint)
             {
@@ -239,25 +243,25 @@ void Tokenizer::clearSubstr()
     {
         this->checkImplicitMultiplication();
         this->output.emplace_back(std::make_shared<Variable>(
-                                                std::string(1, this->substr[idx])));
-        
+            std::string(1, this->substr[idx])));
+
         this->getSubSript(idx);
-        
-        
+
+
     }
     this->substr.clear();
-    
+
 }
 
 void Tokenizer::checkImplicitMultiplication()
 {
-     if (this->output.size() 
-            && this->output.back().get()->getType() != OPERATOR
-            && this->output.back().get()->getType() != FUNCTION
-            && this->output.back().get()->getType() != LEFTPAREN)
-        {
-            this->output.emplace_back(std::make_shared<Operator>("*"));
-        }
+    if (this->output.size()
+           && this->output.back().get()->getType() != OPERATOR
+           && this->output.back().get()->getType() != FUNCTION
+           && this->output.back().get()->getType() != LEFTPAREN)
+    {
+        this->output.emplace_back(std::make_shared<Operator>("*"));
+    }
 }
 
 void Tokenizer::checkSubstr()
@@ -266,15 +270,15 @@ void Tokenizer::checkSubstr()
     {
         return;
     }
-    
+
     std::shared_ptr<MWTNode> current = mwtRoot;
     int lastMatchedIndex = -1;
     std::string matchedString;
 
     // Traverse the substring to find the longest match in the trie
-    for (int idx = 0; idx< this->substr.length(); idx++)
+    for (int idx = 0; idx < this->substr.length(); idx++)
     {
-        
+
         char ch = this->substr[idx];
         if (current->getChild(ch))
         {
@@ -297,14 +301,14 @@ void Tokenizer::checkSubstr()
     if (lastMatchedIndex != -1) // Found a match
     {
         int startIndexInInput = this->currentIndex - this->substr.length();
-        int matchStartInInput = startIndexInInput + lastMatchedIndex - 
-                                                (matchedString.length() - 1);
+        int matchStartInInput = startIndexInInput + lastMatchedIndex -
+            (matchedString.length() - 1);
         // Process characters before the matched string as variables
-        for (int idx = 0; idx < lastMatchedIndex + 1 - matchedString.length(); 
+        for (int idx = 0; idx < lastMatchedIndex + 1 - matchedString.length();
                                                                     idx++)
         {
             std::string newVar;
-            newVar += this->substr[idx] + 
+            newVar += this->substr[idx] +
                 this->getSubSript(startIndexInInput + idx);
             this->checkImplicitMultiplication();
             this->output.emplace_back(std::make_shared<Variable>(newVar));
@@ -316,7 +320,7 @@ void Tokenizer::checkSubstr()
         }
 
         // Process the matched string as a function/operator
-        auto match = symbolTable[matchedString]; 
+        auto match = symbolTable[matchedString];
         if (match.first == FUNCTION)
         {
             this->checkImplicitMultiplication();
@@ -338,8 +342,8 @@ void Tokenizer::checkSubstr()
         // Remove processed part from this->substr
         this->substr.erase(0, lastMatchedIndex + 1);
     }
-    
-    
+
+
 }
 
 
@@ -349,7 +353,7 @@ std::string Tokenizer::getSubSript(int idx)
     std::string subscript = "";
     int tmpIdx = this->currentIndex;
     this->currentIndex = idx;
-    
+
     if (this->peek() != '_')
     {
         this->currentIndex = tmpIdx;
@@ -378,7 +382,7 @@ std::string Tokenizer::getSubSript(int idx)
     }
     this->currentIndex = tmpIdx;
     return subscript;
-    
+
 }
 
 
@@ -394,7 +398,7 @@ std::string Tokenizer::listOutput()
         {
             out += ", ";
         }
-        
+
     }
     return out;
 }

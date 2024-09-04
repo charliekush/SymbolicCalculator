@@ -1,7 +1,7 @@
 /**
  * @file token.hpp
  * @author Charles Kushelevsky (charliekushelevsky@gmail.com)
- * @brief Defines classes and enums for token representation in 
+ * @brief Defines classes and enums for token representation in
  * symbolic calculations.
  * @version 0.1
  * @date 2024-08-31
@@ -17,15 +17,16 @@
 
 enum TokenType
 {
-    NUMBER, 
-    VARIABLE, 
+    NUMBER,
+    VARIABLE,
     OPERATOR,
-    FUNCTION, 
-    LEFTPAREN, 
+    FUNCTION,
+    LEFTPAREN,
     RIGHTPAREN
 };
 
-enum class NumberType {
+enum class NumberType
+{
     INTEGER,
     DOUBLE
 };
@@ -33,10 +34,10 @@ enum class NumberType {
 /**
  * @brief Defines associativity for operators.
  */
-enum class Associativity 
-{ 
+enum class Associativity
+{
     LEFT,
-    RIGHT 
+    RIGHT
 };
 
 /**
@@ -93,8 +94,8 @@ public:
     Associativity associativity;   //!< Associativity of the operator
 };
 
-static std::unordered_map<std::string, 
-                    std::pair<TokenType,SymbolProperties>> 
+static std::unordered_map<std::string,
+    std::pair<TokenType, SymbolProperties>>
     symbolTable = {
     {"+", {TokenType::OPERATOR, {1, Associativity::LEFT}}},
     {"-", {TokenType::OPERATOR, {1, Associativity::LEFT}}},
@@ -116,20 +117,21 @@ static std::unordered_map<std::string,
 /**
  * @brief Represents an operator token.
  */
-class Operator : public Token {
+class Operator : public Token
+{
 private:
     SymbolProperties properties; //!< Properties of the operator
 
 public:
     /**
-     * @brief Constructs an Operator with a string representation 
+     * @brief Constructs an Operator with a string representation
      * and properties.
      * @param str The string representation of the operator.
      * @param properties The properties of the operator.
      */
     Operator(const std::string& str, SymbolProperties properties);
     /**
-     * @brief Constructs an Operator with a string representation 
+     * @brief Constructs an Operator with a string representation
      * and properties.
      * @param str The string representation of the operator.
      */
@@ -144,7 +146,8 @@ public:
 /**
  * @brief Represents a function token.
  */
-class Function : public Token {
+class Function : public Token
+{
 private:
     SymbolProperties properties; //!< Properties of the function
 
@@ -170,7 +173,8 @@ public:
 /**
  * @brief Represents a function token.
  */
-class Variable : public Token {
+class Variable : public Token
+{
 public:
     /**
      * @brief Constructs a Function with a string representation and properties.
@@ -183,17 +187,18 @@ public:
 /**
  * @brief Represents a number token.
  */
-class Number : public Token {
+class Number : public Token
+{
 private:
     //! Value of the number token
-   std::variant<int, double> value; 
+    std::variant<int, double> value;
 
 public:
     //! Type of the number token (integer or double)
     NumberType type;
 
     /**
-     * @brief Constructs a Number with a string representation and a 
+     * @brief Constructs a Number with a string representation and a
      * double value.
      * @param str The string representation of the number.
      * @param value The double value of the number.
@@ -201,7 +206,7 @@ public:
     Number(const std::string& str, double value);
 
     /**
-     * @brief Constructs a Number with a string representation and 
+     * @brief Constructs a Number with a string representation and
      * an integer value.
      * @param str The string representation of the number.
      * @param value The integer value of the number.
@@ -221,15 +226,16 @@ public:
     double getFloat() const;
 
     void flipSign();
-    
-    
+
+
 };
 
 
 /**
  * @brief Represents a left parenthesis
  */
-class LeftParenthesis : public Token {
+class LeftParenthesis : public Token
+{
 public:
     /**
      * @brief Constructs a '(' token
@@ -240,7 +246,8 @@ public:
 /**
  * @brief Represents a left parenthesis
  */
-class RightParenthesis : public Token {
+class RightParenthesis : public Token
+{
 public:
     /**
      * @brief Constructs a '(' token
