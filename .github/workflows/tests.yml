@@ -1,19 +1,23 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+      
 jobs:
   test:
     runs-on: ubuntu-latest
     steps:
+
     - name: Create folder
       run: mkdir -p external/
 
-    - name: Checkout code
-      uses: actions/checkout@v4
-      with:
-        submodules: recursive
-    
     - name: Initialize and update submodules (if needed)
       run: git submodule update --init --recursive
-    
-   
     
     - name: Set up environment
       run: |
@@ -21,8 +25,8 @@ jobs:
     
     - name: Build and run tests
       run: |
-        cmake -B build -DCMAKE_BUILD_TYPE=Debug
-        cd build
+        cmake -B build/ -DCMAKE_BUILD_TYPE=Debug
+        cd build/
         make
         cd ..
-        ./build/symbolic
+        ./build/googletests
