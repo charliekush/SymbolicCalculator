@@ -27,6 +27,7 @@ jobs:
     
     - name: Build and run tests
       run: |
+        ls external
         cmake -B build/ -DCMAKE_BUILD_TYPE=Debug
         cd build/
         make
