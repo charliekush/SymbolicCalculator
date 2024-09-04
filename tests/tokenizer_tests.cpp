@@ -1,6 +1,9 @@
 /**
- * @file gtest.cpp
- * @brief Google Tests for tokenizer.hpp
+ * @file tokenizer_tests.cpp
+ * @author Charles Kushelevsky (charliekushelevsky@gmail.com)
+ * @brief Google Tests for tokenizer.cpp
+ * @version 0.1
+ * @date 2024-09-04
  */
 
 #include "token.hpp"
@@ -47,7 +50,7 @@ protected:
         parser = std::make_unique<Tokenizer>(input);
         tokens = parser->tokenize();
 
-        //ASSERT_EQ(expected.size(), tokens.size());
+        
 
         int size = expected.size() > tokens.size() ? 
             tokens.size():expected.size();
@@ -73,6 +76,7 @@ protected:
             << tokens[idx].get()->getStr() << ", "
             << TokenTypeLookup[tokens[idx].get()->getType()] << "\n";
         }
+        ASSERT_EQ(expected.size(), tokens.size());
 
     }
 

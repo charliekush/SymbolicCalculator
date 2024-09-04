@@ -15,13 +15,19 @@ set(CALCULATOR_SOURCE_FILES
     src/tokenizer.cpp
     src/token.cpp
     src/MWT.cpp
+    src/postfix.cpp
+    src/token_queue.cpp
 )
 
 set(GTEST_SOURCE_FILES
     src/tokenizer.cpp
     src/token.cpp
     src/MWT.cpp
+    src/postfix.cpp
+    src/token_queue.cpp
     tests/tokenizer_tests.cpp
+
+    
 )
 
 

@@ -158,34 +158,28 @@ void Tokenizer::parseExpression()
 void Tokenizer::handleMinus()
 {
     this->clearSubstr();
-    // Check if '-' is followed by a number (handling unary minus)
     bool lastWasOperator = false;
-    if (symbolTable.find(std::string(1, this->peekBack()))
-                != symbolTable.end())
-    {
-        lastWasOperator =
-            (symbolTable[std::string(1, this->peekBack())].first
-            == OPERATOR) ||
-            (symbolTable[std::string(1, this->peekBack())].first
-            == LEFTPAREN);
 
+    // Check if the previous character was an operator or left parenthesis
+    if (symbolTable.find(std::string(1, this->peekBack())) != symbolTable.end())
+    {
+        lastWasOperator = (symbolTable[std::string(1, this->peekBack())].first == OPERATOR) ||
+                          (symbolTable[std::string(1, this->peekBack())].first == LEFTPAREN);
     }
+
     if (this->peekBack() == '\0' || lastWasOperator)
     {
-        // Peek the next character to see if it's a number
         if (this->peek() >= '0' && this->peek() <= '9')
         {
             this->checkImplicitMultiplication();
-            // It's a negative number
             this->getNext(); // Move past the '-'
-            std::shared_ptr<Number> newNum =
+            std::shared_ptr<Number> newNum = 
                 std::make_shared<Number>(this->parseNumber());
             newNum->flipSign(); // Flip the sign of the number
             this->output.emplace_back(newNum);
         }
         else
         {
-            // unary minus before a variable or expression
             this->substr += '-';
             this->getNext();
         }
@@ -193,7 +187,8 @@ void Tokenizer::handleMinus()
     else
     {
         // Binary minus (operator)
-        this->output.emplace_back(std::make_shared<Operator>("-"));
+        auto minusToken = std::make_shared<Operator>("-");
+        this->output.emplace_back(minusToken);
         this->getNext();
     }
 }

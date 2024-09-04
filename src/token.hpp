@@ -36,40 +36,9 @@ enum class NumberType
  */
 enum class Associativity
 {
+    NONE,
     LEFT,
     RIGHT
-};
-
-/**
- * @brief Base class for tokens.
- */
-class Token
-{
-protected:
-    TokenType type; //!< Type of the token
-    std::string str; //!< String representation of the token
-
-public:
-    /**
-     * @brief Constructs a Token with a type and a string representation.
-     * @param type The type of the token.
-     * @param str The string representation of the token.
-     */
-    Token(TokenType type, const std::string& str);
-
-    virtual ~Token() = default;
-
-    /**
-     * @brief Returns the type of the token.
-     * @return The type of the token.
-     */
-    TokenType getType() const;
-
-    /**
-     * @brief Returns the string representation of the token.
-     * @return The string representation of the token.
-     */
-    std::string getStr() const;
 };
 
 /**
@@ -93,6 +62,73 @@ public:
     int precedence;                //!< The precedence of the operator
     Associativity associativity;   //!< Associativity of the operator
 };
+
+/**
+ * @brief Base class for tokens.
+ */
+class Token
+{
+protected:
+    //!< Type of the token
+    TokenType type; 
+    //! String representation of the token
+    std::string str; 
+    //! Properties of the token
+    SymbolProperties properties;
+    bool negative; 
+
+public:
+    /**
+     * @brief Constructs a Token with a type and a string representation.
+     * @param type The type of the token.
+     * @param str The string representation of the token.
+     */
+    Token(TokenType type, const std::string& str);
+
+    virtual ~Token() = default;
+
+    /**
+     * @brief Returns the type of the token.
+     * @return The type of the token.
+     */
+    TokenType getType() const;
+
+    /**
+     * @brief Returns the string representation of the token.
+     * @return The string representation of the token.
+     */
+    std::string getStr() const;
+    
+    /**
+     * @brief Get the Precedence of a token
+     * 
+     * @return Precedence of a token
+     */
+    int getPrecedence();
+
+    /**
+     * @brief Get the Associativity of a token
+     * 
+     * @return Associativity of a token
+     */
+    Associativity getAssociativity();
+
+
+    /**
+     * @brief sets the isNegative flag to indicate this token represents a 
+     * negative value.
+     * @param value The value to set isNegative to.
+     */
+    void setNegative(bool value);
+
+    /**
+     * @brief Returns whether the token represents a negative value.
+     * @return True if the token is negative, otherwise false.
+     */
+    bool isNegative() const;
+};
+
+
 
 static std::unordered_map<std::string,
     std::pair<TokenType, SymbolProperties>>
@@ -119,28 +155,15 @@ static std::unordered_map<std::string,
  */
 class Operator : public Token
 {
-private:
-    SymbolProperties properties; //!< Properties of the operator
-
 public:
-    /**
-     * @brief Constructs an Operator with a string representation
-     * and properties.
-     * @param str The string representation of the operator.
-     * @param properties The properties of the operator.
-     */
-    Operator(const std::string& str, SymbolProperties properties);
+    
     /**
      * @brief Constructs an Operator with a string representation
      * and properties.
      * @param str The string representation of the operator.
      */
     Operator(const std::string& str);
-    //! Returns the precedence of the operator.
-    int getPrecedence();
-
-    //! Returns the associativity of the operator.
-    Associativity getAssociativity();
+    
 };
 
 /**
@@ -152,22 +175,13 @@ private:
     SymbolProperties properties; //!< Properties of the function
 
 public:
-    /**
-     * @brief Constructs a Function with a string representation and properties.
-     * @param str The string representation of the function.
-     * @param properties The properties of the function.
-     */
-    Function(const std::string& str, SymbolProperties properties);
+    
     /**
      * @brief Constructs a Function with a string representation and properties.
      * @param str The string representation of the function.
      */
     Function(const std::string& str);
-    //! Returns the precedence of the function.
-    int getPrecedence();
-
-    //! Returns the associativity of the function.
-    Associativity getAssociativity();
+    
 };
 
 /**

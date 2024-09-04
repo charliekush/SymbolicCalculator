@@ -11,6 +11,27 @@
 
 #include "token.hpp"
 
+
+
+/**
+ * @brief Constructs a Token with specified type and string.
+ * @param t The type of the token.
+ * @param s The string representation of the token.
+ */
+Token::Token(TokenType type, const std::string& str) : type(type), str(str) 
+{
+    if (symbolTable.find(str) != symbolTable.end())
+    {
+        properties = symbolTable[str].second;
+    }
+    else
+    {
+        properties = SymbolProperties(0,Associativity::NONE);
+    }
+    this->setNegative(false);
+}
+
+
 TokenType Token::getType() const
 {
     return type;
@@ -20,6 +41,40 @@ std::string Token::getStr() const
 {
     return str;
 } 
+
+/**
+ * @brief Gets the precedence of the operator.
+ * @return The precedence of the operator.
+ */
+int Token::getPrecedence()
+{
+    return properties.precedence;
+}
+
+/**
+ * @brief Gets the associativity of the operator.
+ * @return The associativity of the operator.
+ */
+Associativity Token::getAssociativity()
+{
+    return properties.associativity;
+}
+/**
+ * @brief sets the isNegative flag to indicate this token represents a 
+ * negative value.
+ * @param value The value to set isNegative to.
+ */
+void Token::setNegative(bool value) {
+    this->negative = value;
+}
+
+/**
+ * @brief Returns whether the token represents a negative value.
+ * @return True if the token is negative, otherwise false.
+ */
+bool Token::isNegative() const {
+    return this->negative;
+}
 /**
  * @brief Default constructor for SymbolProperties.
  * Initializes precedence to -1 and associativity to LEFT.
@@ -38,20 +93,10 @@ SymbolProperties::SymbolProperties()
 SymbolProperties::SymbolProperties(int precedence, Associativity associativity):
     precedence(precedence), associativity(associativity) {}
 
-/**
- * @brief Constructs a Token with specified type and string.
- * @param t The type of the token.
- * @param s The string representation of the token.
- */
-Token::Token(TokenType type, const std::string& str) : type(type), str(str) {}
 
-/**
- * @brief Constructs an Operator with a specified string and properties.
- * @param str The string representation of the operator.
- * @param properties The properties of the operator.
- */
-Operator::Operator(const std::string& str, SymbolProperties properties) : 
-        Token(OPERATOR, str), properties(properties) {}
+
+
+
 
 /**
  * @brief Constructs an Operator with a specified string and properties.
@@ -64,31 +109,6 @@ Operator::Operator(const std::string& str) :
 }
 
 
-/**
- * @brief Gets the precedence of the operator.
- * @return The precedence of the operator.
- */
-int Operator::getPrecedence()
-{
-    return properties.precedence;
-}
-
-/**
- * @brief Gets the associativity of the operator.
- * @return The associativity of the operator.
- */
-Associativity Operator::getAssociativity()
-{
-    return properties.associativity;
-}
-
-/**
- * @brief Constructs a Function with a specified string and properties.
- * @param str The string representation of the function.
- * @param properties The properties of the function.
- */
-Function::Function(const std::string& str, SymbolProperties properties) : 
-        Token(FUNCTION, str), properties(properties) {}
 
 
 /**
@@ -96,29 +116,9 @@ Function::Function(const std::string& str, SymbolProperties properties) :
  * @param str The string representation of the function.
  */
 Function::Function(const std::string& str) : 
-        Token(FUNCTION, str)
-{
-    properties = symbolTable[str].second;
-}
+        Token(FUNCTION, str) {}
 
 
-/**
- * @brief Gets the precedence of the function.
- * @return The precedence of the function.
- */
-int Function::getPrecedence()
-{
-    return properties.precedence;
-}
-
-/**
- * @brief Gets the associativity of the function.
- * @return The associativity of the function.
- */
-Associativity Function::getAssociativity()
-{
-    return properties.associativity;
-}
 
 /**
  * @brief Constructs a Number with a specified string and double value.
