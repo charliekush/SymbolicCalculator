@@ -2,7 +2,9 @@ jobs:
   test:
     runs-on: ubuntu-latest
     steps:
-    
+    - name: Create folder
+      run: mkdir -p external/
+
     - name: Checkout code
       uses: actions/checkout@v4
       with:
@@ -11,8 +13,7 @@ jobs:
     - name: Initialize and update submodules (if needed)
       run: git submodule update --init --recursive
     
-    - name: Create folder
-      run: mkdir -p external/
+   
     
     - name: Set up environment
       run: |
