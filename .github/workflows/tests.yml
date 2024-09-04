@@ -19,7 +19,7 @@ jobs:
         submodules: recursive
     
     - name: Create folder
-      run: mkdir -p external/
+      run: mkdir -p ./external/googletests
     
     - name: Set up environment
       run: |
