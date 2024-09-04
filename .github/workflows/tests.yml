@@ -7,29 +7,34 @@ on:
   pull_request:
     branches:
       - main
-      
+
 jobs:
   test:
     runs-on: ubuntu-latest
     steps:
 
-    - name: create external dir
-      run: mkdir -p external/
-
     - name: Checkout code
       uses: actions/checkout@v4
       with:
-        submodules: recursive  
-    
+        submodules: recursive  # Initialize and update submodules
+
+    - name: List directory contents
+      run: |
+        echo "Listing root directory:"
+        ls -l
+        echo "Listing external directory:"
+        ls -l external/
+        echo "Listing external/googletest directory:"
+        ls -l external/googletest
+
     - name: Set up environment
       run: |
         sudo apt-get update && sudo apt-get install -y cmake build-essential
     
     - name: Build and run tests
       run: |
-        ls -l external/
         cmake -B build/ -DCMAKE_BUILD_TYPE=Debug
         cd build/
         make
         cd ..
-        ./build/googletests  # Replace with your actual test executable name
+        ./build/symbolic  # Replace with your actual test executable name
