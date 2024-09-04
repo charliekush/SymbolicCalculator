@@ -11,6 +11,15 @@
 
 #include "token.hpp"
 
+TokenType Token::getType() const
+{
+    return type;
+} 
+
+std::string Token::getStr() const
+{
+    return str;
+} 
 /**
  * @brief Default constructor for SymbolProperties.
  * Initializes precedence to -1 and associativity to LEFT.
@@ -45,6 +54,17 @@ Operator::Operator(const std::string& str, SymbolProperties properties) :
         Token(OPERATOR, str), properties(properties) {}
 
 /**
+ * @brief Constructs an Operator with a specified string and properties.
+ * @param str The string representation of the operator.
+ */
+Operator::Operator(const std::string& str) : 
+        Token(OPERATOR, str) 
+{
+    properties = symbolTable[str].second;
+}
+
+
+/**
  * @brief Gets the precedence of the operator.
  * @return The precedence of the operator.
  */
@@ -69,6 +89,18 @@ Associativity Operator::getAssociativity()
  */
 Function::Function(const std::string& str, SymbolProperties properties) : 
         Token(FUNCTION, str), properties(properties) {}
+
+
+/**
+ * @brief Constructs a Function with a specified string and properties.
+ * @param str The string representation of the function.
+ */
+Function::Function(const std::string& str) : 
+        Token(FUNCTION, str)
+{
+    properties = symbolTable[str].second;
+}
+
 
 /**
  * @brief Gets the precedence of the function.
@@ -142,7 +174,31 @@ double Number::getFloat() const
     return std::get<double>(value);
 }
 
+void Number::flipSign() {
+    if(this->str[0] == '-')
+    {
+        this->str.erase(this->str.begin());
+    }
+    else
+    {
+        this->str.insert(0, 1, '-');
+    }
+    // Use std::visit to apply the sign flip to the variant value
+    std::visit([this](auto& val) {
+         // Get the type of the variant value
+        using T = std::decay_t<decltype(val)>;
+        if constexpr (std::is_integral_v<T>) {
+            // Handle integral type (int)
+            val = -val;
+        } else if constexpr (std::is_floating_point_v<T>) {
+            // Handle floating-point type (double)
+            val = -val;
+        }
+    }, value);
+}
 LeftParenthesis::LeftParenthesis() : Token(LEFTPAREN, "(") {};
 
 
 RightParenthesis::RightParenthesis() : Token(RIGHTPAREN, ")") {};
+
+Variable::Variable(const std::string& str) : Token(VARIABLE, str) {};

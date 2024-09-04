@@ -17,12 +17,11 @@
 
 enum TokenType
 {
-    NUMBER,
-    VARIABLE,
+    NUMBER, 
+    VARIABLE, 
     OPERATOR,
-    PARENTHESIS,
-    FUNCTION,
-    LEFTPAREN,
+    FUNCTION, 
+    LEFTPAREN, 
     RIGHTPAREN
 };
 
@@ -63,13 +62,13 @@ public:
      * @brief Returns the type of the token.
      * @return The type of the token.
      */
-    virtual TokenType getType() const = 0;
+    TokenType getType() const;
 
     /**
      * @brief Returns the string representation of the token.
      * @return The string representation of the token.
      */
-    virtual std::string getStr() const = 0;
+    std::string getStr() const;
 };
 
 /**
@@ -108,7 +107,10 @@ static std::unordered_map<std::string,
     {"cot", {TokenType::FUNCTION, {4, Associativity::LEFT}}},
     {"csc", {TokenType::FUNCTION, {4, Associativity::LEFT}}},
     {"sec", {TokenType::FUNCTION, {4, Associativity::LEFT}}},
-    {"exp", {TokenType::FUNCTION, {4, Associativity::LEFT}}}
+    {"exp", {TokenType::FUNCTION, {4, Associativity::LEFT}}},
+    {"log", {TokenType::FUNCTION, {5, Associativity::LEFT}}},
+    {"(", {TokenType::LEFTPAREN, {5, Associativity::LEFT}}},
+    {")", {TokenType::RIGHTPAREN, {5, Associativity::LEFT}}},
 };
 
 /**
@@ -126,7 +128,12 @@ public:
      * @param properties The properties of the operator.
      */
     Operator(const std::string& str, SymbolProperties properties);
-
+    /**
+     * @brief Constructs an Operator with a string representation 
+     * and properties.
+     * @param str The string representation of the operator.
+     */
+    Operator(const std::string& str);
     //! Returns the precedence of the operator.
     int getPrecedence();
 
@@ -148,7 +155,11 @@ public:
      * @param properties The properties of the function.
      */
     Function(const std::string& str, SymbolProperties properties);
-
+    /**
+     * @brief Constructs a Function with a string representation and properties.
+     * @param str The string representation of the function.
+     */
+    Function(const std::string& str);
     //! Returns the precedence of the function.
     int getPrecedence();
 
@@ -157,14 +168,29 @@ public:
 };
 
 /**
+ * @brief Represents a function token.
+ */
+class Variable : public Token {
+public:
+    /**
+     * @brief Constructs a Function with a string representation and properties.
+     * @param str The string representation of the function.
+     * @param properties The properties of the function.
+     */
+    Variable(const std::string& str);
+};
+
+/**
  * @brief Represents a number token.
  */
 class Number : public Token {
 private:
-    std::variant<int, double> value; //!< Value of the number token
+    //! Value of the number token
+   std::variant<int, double> value; 
 
 public:
-    NumberType type; //!< Type of the number token (integer or double)
+    //! Type of the number token (integer or double)
+    NumberType type;
 
     /**
      * @brief Constructs a Number with a string representation and a 
@@ -193,6 +219,10 @@ public:
 
     //! Returns the double value of the number token.
     double getFloat() const;
+
+    void flipSign();
+    
+    
 };
 
 
@@ -218,4 +248,4 @@ public:
     RightParenthesis();
 };
 
-#endif
+#endif // __TOKEN_HPP__

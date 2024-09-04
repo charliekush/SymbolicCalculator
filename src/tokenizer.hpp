@@ -10,6 +10,9 @@
 #define __TOKENIZER_HPP__
 
 #include "token.hpp"
+#include "MWT.hpp"
+
+#include <memory>
 #include <vector>
 
 /**
@@ -27,33 +30,84 @@ public:
      * @brief Tokenizes the input string into a vector of Tokens.
      * @return A vector of Token objects.
      */
-    std::vector<Token> tokenize();
+    std::vector<std::shared_ptr<Token>> tokenize();
+    
+    //DEBUG START
+    std::string listOutput();
+    //DEBUG END
+    
 
 private:
     std::string input; //!< The input string to be tokenized
+    std::string substr;
     size_t currentIndex; //!< The current index in the input string
     char currentChar; //!< The current character being processed
     int len; //!< Length of the input string
+    std::shared_ptr<MWTNode> mwtRoot;
+    std::vector<std::shared_ptr<Token>> output;
+    
+    /**
+     * @brief constructs multiway trie from symbolTable @see token.hpp
+     */
+    void constructTree();
+    
 
     /**
      * @brief Peeks at the next character in the input string without 
      * advancing the index.
-     * @return The next character in the input string.
+     * @return The next character in the input string. '\0' if last character 
+     * in input.
      */
     char peek() const;
 
     /**
-     * @brief Advances to the next character in the input string.
+     * @brief Peeks at the next character in the input string without 
+     * advancing the index.
+     * @return The previous character in the input string. '\0' if first 
+     * character in input.
+     */
+    char peekBack() const;
+
+
+    /**
+     * @brief Advances to the next character in the input string. '\0' if 
+     * last character in input.
      */
     void getNext();
 
-    std::vector<Token> parseExpression(); //!< Vector to hold parsed tokens
+    /**
+     * @brief splits substr into variables and clears substr
+     * 
+     */
+    void clearSubstr();
 
+    /**
+     * @brief checks for symbols in substr
+     * 
+     */
+    void checkSubstr();
+    
+    /**
+     * @brief Get the Sub Sript of a str
+     * 
+     * @param idx index in the input
+     * @return subscript string
+     */
+    std::string getSubSript(int idx);
+
+    /**
+     * @brief parse the expression
+     * 
+     * @return std::vector<std::shared_ptr<Token>> 
+     */
+    void parseExpression(); 
+    
+    void checkImplicitMultiplication();
     /**
      * @brief Parses a number token from the input string.
      * @return The parsed Number token.
      */
-    Token parseNumber();
+    Number parseNumber();
 
     /**
      * @brief Parses an identifier token (variable or function) 
@@ -73,6 +127,8 @@ private:
      * @return The parsed Token for the parenthesis.
      */
     Token parseParenthesis();
+
+    
 };
 
 #endif // __TOKENIZER_HPP__
