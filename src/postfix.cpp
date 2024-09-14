@@ -20,25 +20,25 @@ void ShuntingYard::convert()
     {
         this->currentToken = this->input[idx];
         
-        if (this->currentType() == NUMBER)
+        if (this->currentType() == TokenType::NUMBER)
         {
                 this->output.push(this->currentToken);
         }
-        else if (this->currentType() == FUNCTION)
+        else if (this->currentType() == TokenType::FUNCTION)
         {
             this->operators.push(this->currentToken);
         }
-        else if (this->currentType() == OPERATOR)
+        else if (this->currentType() == TokenType::OPERATOR)
         {
             this->handleOperator();
         }
-        else if (this->currentType() == LEFTPAREN)
+        else if (this->currentType() == TokenType::LEFTPAREN)
         {
             this->operators.push(this->currentToken);
         }
-        else if (this->currentType() == RIGHTPAREN)
+        else if (this->currentType() == TokenType::RIGHTPAREN)
         {
-            while (this->operators.top()->getType() != LEFTPAREN)
+            while (this->operators.top()->getType() != TokenType::LEFTPAREN)
             {
                 if (this->operators.size() == 0)
                 {
@@ -51,7 +51,7 @@ void ShuntingYard::convert()
                 //! TODO: add error for mismatched parentheses
             }
             this->operators.pop();
-            if (this->operators.size() > 0 && this->currentType() == FUNCTION)
+            if (this->operators.size() > 0 && this->currentType() == TokenType::FUNCTION)
             {
                 this->popToOutput();
             }
@@ -59,7 +59,7 @@ void ShuntingYard::convert()
     }
     while (this->operators.size() > 0)
     {
-        if (this->operators.top()->getType() == LEFTPAREN)
+        if (this->operators.top()->getType() == TokenType::LEFTPAREN)
         {
             //! TODO: add error for mismatched parentheses
         }
@@ -77,7 +77,7 @@ void ShuntingYard::handleOperator()
         int currentPrecedence = this->currentToken->getPrecedence();
         Associativity currentAssociativity = this->currentToken->getAssociativity();
 
-        topNotLeftParen = this->operators.top()->getType() != LEFTPAREN;
+        topNotLeftParen = this->operators.top()->getType() != TokenType::LEFTPAREN;
 
         greaterPrecedence = (topPrecedence > currentPrecedence);
 
