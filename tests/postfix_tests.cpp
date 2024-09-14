@@ -9,6 +9,7 @@
 #include "token.hpp"
 #include "tokenizer.hpp"
 #include "postfix.hpp"
+#include "lookup.hpp"
 
 #include "test_definitions.hpp"
 
@@ -59,24 +60,24 @@ protected:
         
 
 
-        int size = expected.size() > tokens.size() ? 
-            tokens.size():expected.size();
+        int size = expected.size() > postfix.size() ? 
+            postfix.size():expected.size();
         
         for (int idx = 0; idx < size; idx++)
         {
-            ASSERT_EQ(postfix[idx].get()->getStr(), expected[idx]) 
+            ASSERT_EQ(postfix[idx].get()->getFullStr(), expected[idx]) 
             << "Expected: "
             << expected[idx] << "\n"
             << "Actual: " 
-            << postfix[idx].get()->getStr() << ", "
-            << TokenTypeLookup[postfix[idx].get()->getType()] << "\n\n"
+            << postfix[idx].get()->getFullStr() << ", "
+            << Lookup::getTokenType(postfix[idx].get()->getType()) << "\n\n"
             << "Input:\t" << input << "\n"
             << "Output:\t" << parser->listOutput() << "\n"; 
 
         
         }
-
     }
+    
 
 };
 
