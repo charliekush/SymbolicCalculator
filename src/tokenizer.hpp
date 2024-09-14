@@ -11,9 +11,12 @@
 
 #include "token.hpp"
 #include "MWT.hpp"
+#include "token_queue.hpp"
 
 #include <memory>
 #include <vector>
+#include <set>
+
 
  /**
   * @brief Tokenizer class for parsing an input string into tokens.
@@ -52,11 +55,7 @@ private:
     int len;
     std::shared_ptr<MWTNode> mwtRoot;
     std::vector<std::shared_ptr<Token>> output;
-
-    /**
-     * @brief constructs multiway trie from symbolTable @see token.hpp
-     */
-    void constructTree();
+    int tokensIdx;
 
 
     /**
@@ -94,13 +93,7 @@ private:
      */
     void checkSubstr();
 
-    /**
-     * @brief Get the Sub Sript of a str
-     *
-     * @param idx index in the input
-     * @return subscript string
-     */
-    std::string getSubSript(int idx);
+    
 
     /**
      * @brief parse the expression
@@ -109,25 +102,16 @@ private:
      */
     void parseExpression();
 
-    void checkImplicitMultiplication();
+    void nextImplicit();
     /**
      * @brief Parses a number token from the input string.
      * @return The parsed Number token.
      */
     Number parseNumber();
 
-    /**
-     * @brief Parses an identifier token (variable or function)
-     * from the input string.
-     * @return The parsed Token for the identifier.
-     */
-    Token parseIdentifier();
 
-    /**
-     * @brief Parses an operator token from the input string.
-     * @return The parsed Operator token.
-     */
-    Token parseOperator();
+    
+    
 
     /**
      * @brief Parses a parenthesis token from the input string.
@@ -139,8 +123,16 @@ private:
      * @brief handles potential unary minus sign in input
      *
      */
-    void handleMinus();
-
+    void handleUnary();
+    
+    void handleFunction();
+    void handleVariable();
+    void handleSubscript();
+    std::shared_ptr<TokenQueue> getFunctionSubscript();
+    std::shared_ptr<TokenQueue> getSubTokens();
+    void fixEulers();
+    std::shared_ptr<Token> currentToken() const;
+    
 
 };
 
