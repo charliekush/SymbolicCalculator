@@ -1,6 +1,9 @@
 #include "token_queue.hpp"
 
-TokenQueue::TokenQueue() {}
+TokenQueue::TokenQueue() 
+{
+    this->queue = std::vector<std::shared_ptr<Token>>();
+}
 
 TokenQueue::TokenQueue(int size)
 {
@@ -43,13 +46,17 @@ int TokenQueue::size()
 {
     return this->queue.size();
 }
+bool TokenQueue::empty()
+{
+    return (this->queue.size() == 0);
+}
 
 std::string TokenQueue::toString()
 {
-    std::string out;
+    std::string out = "";
     for (int idx = 0; idx < this->queue.size(); idx++)
     {
-        out += this->queue[idx].get()->getStr();
+        out += this->queue[idx].get()->getFullStr();
         if (idx != this->queue.size() - 1)
         {
             out += ", ";
@@ -61,4 +68,31 @@ std::string TokenQueue::toString()
 std::vector<std::shared_ptr<Token>> TokenQueue::getVector()
 {
     return this->queue;
+}
+
+void TokenQueue::clear()
+{
+    queue.clear();
+}
+std::shared_ptr<Token> TokenQueue::popFront()
+{
+    if (this->size() == 0)
+    {
+        //! TODO: implement error handling
+        return nullptr;
+    }
+    std::shared_ptr<Token> out = this->queue.front();
+    this->queue.erase(this->queue.begin());
+    return out;
+}
+std::shared_ptr<Token> TokenQueue::popBack()
+{
+    if (this->size() == 0)
+    {
+        //! TODO: implement error handling
+        return nullptr;
+    }
+    std::shared_ptr<Token> out = this->queue.back();
+    this->queue.pop_back();
+    return out;
 }

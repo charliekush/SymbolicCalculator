@@ -17,9 +17,14 @@ public:
     std::shared_ptr<Token> back();
     std::shared_ptr<Token> pop();
     void push(std::shared_ptr<Token> token);
+    void clear();
     int size();
+    bool empty();
+    std::shared_ptr<Token> popFront();
+    std::shared_ptr<Token> popBack();
     std::string toString();
     std::vector<std::shared_ptr<Token>> getVector();
+    
 
     
 private:
