@@ -69,7 +69,7 @@ std::vector<std::shared_ptr<Token>> Tokenizer::tokenize()
             
         }
         
-
+        // check for unary operators
         if (this->currentToken()->getType() == TokenType::OPERATOR &&
             (this->currentToken()->getStr() == "-" || 
                 this->currentToken()->getStr() == "+"))
@@ -93,10 +93,13 @@ std::vector<std::shared_ptr<Token>> Tokenizer::tokenize()
             std::shared_ptr<TokenQueue> exponent = func->getExponent();
             if (exponent)
             {
+                int exponentIdx = this->tokensIdx + 1;
                 while(!exponent->empty())
                 {
-                    this->output.emplace(this->output.begin() + 
-                            this->tokensIdx + 1, exponent->popBack());
+                    this->output.emplace(this->output.begin() + exponentIdx,
+                        exponent->pop());
+                    exponentIdx++;
+                    
                 }
             }
         }
@@ -420,10 +423,10 @@ void Tokenizer::handleFunction()
                 }
                 subScript = this->getSubTokens();
                 if (subScript->size() == 1 && 
-                        subScript->front()->getType() == TokenType::NUMBER)
+                        subScript->top()->getType() == TokenType::NUMBER)
                 {
                     func->setSubscript(
-                        std::dynamic_pointer_cast<Number>(subScript->front()));
+                        std::dynamic_pointer_cast<Number>(subScript->top()));
                     
                 }
                 else
@@ -511,15 +514,9 @@ std::shared_ptr<TokenQueue> Tokenizer::getSubTokens()
         //! TODO: implement error handling for mismatched parens
         subExpr->clear();
     }
-    while (subExpr->size() > 0 && 
-            subExpr->front()->getType() == TokenType::LEFTPAREN && 
-            subExpr->back()->getType() == TokenType::RIGHTPAREN)
-    {
-        subExpr->popBack();
-        subExpr->popFront();
-    }
+    
 
-
+    subExpr->removeParens();
     return subExpr;
 }
 

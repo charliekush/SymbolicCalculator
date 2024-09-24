@@ -26,7 +26,7 @@ private:
     void handleOperator();
     
     TokenType currentType();
-void popToOutput();
+    void popToOutput();
     
 };
 #endif // __POSTFIX_HPP__
