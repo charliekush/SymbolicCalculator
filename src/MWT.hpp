@@ -23,6 +23,9 @@ public:
     MWTNode(char character, bool is_word);
 
     std::shared_ptr<MWTNode> getChild(const char& in);
-    
+    /**
+     * @brief constructs multiway trie from symbolTable @see token.hpp
+     */
+    std::shared_ptr<MWTNode> constructMWT();
 };
 #endif // __MWT_HPP__
