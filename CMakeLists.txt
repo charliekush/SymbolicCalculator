@@ -15,6 +15,7 @@ set(PROJECT_SOURCE_FILES
     src/MWT.cpp
     src/postfix.cpp
     src/token_queue.cpp
+    src/token_container.cpp
     src/expression_node.cpp
     src/expression_tree.cpp
 )
