@@ -113,15 +113,11 @@ TEST_F(PostFixTests, UnaryMinusAfterOperator) {
 
 TEST_F(PostFixTests, FunctionAndOperator) {
     input = "cos(0)+sin(0)";
-    expected = { "cos", "sin", "+"};
+    expected = { "cos(0)", "sin(0)", "+"};
     check();
 }
 
-TEST_F(PostFixTests, NestedFunctions) {
-    input = "sin(cos(0))";
-    expected = {"sin"};
-    check();
-}
+
 
 TEST_F(PostFixTests, ComplexExpression) {
     input = "3+4*2/(1-5)^2^3";

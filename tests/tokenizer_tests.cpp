@@ -158,10 +158,23 @@ protected:
             << msg2(idx);
         ASSERT_EQ(actual->getFullStr(), expected->getFullStr()) 
             << msg2(idx);
-        ASSERT_EQ(expected->getSubscript()->getStr(), 
+        ASSERT_TRUE((expected->getSubscript() == nullptr) == 
+                            (actual->getSubscript() == nullptr));
+        if ((expected->getSubscript() != nullptr) && 
+                    (actual->getSubscript() != nullptr))
+        {
+            ASSERT_EQ(expected->getSubscript()->getStr(), 
                     actual->getSubscript()->getStr()) << msg2(idx);
-        checkExactTokens(expected->getSubExpr()->getVector(), 
+        }
+
+        ASSERT_TRUE((expected->getSubExpr() == nullptr) == 
+                            (actual->getSubExpr() == nullptr));
+        if ((expected->getSubExpr() != nullptr) && 
+                    (actual->getSubExpr() != nullptr))
+        {
+            checkExactTokens(expected->getSubExpr()->getVector(), 
                         actual->getSubExpr()->getVector());
+        }
         
     }
     void checkNumber(std::shared_ptr<Token> expectedToken, 
@@ -462,7 +475,7 @@ TEST_F(TokenizerTests, LogWithPowerSubScriptAndMultiTokenInput)
     checkExactTokens();
 }
 
-/*
+
 
 TEST_F(TokenizerTests, SinWithSingleVariable)
 {
@@ -480,7 +493,7 @@ TEST_F(TokenizerTests, SinWithSingleVariable)
 
     checkExactTokens();
 }
-
+/*
 TEST_F(TokenizerTests, SinWithParenthesizedExpression)
 {
     input = "sin(x+7)";
