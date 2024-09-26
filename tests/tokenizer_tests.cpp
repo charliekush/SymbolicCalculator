@@ -444,12 +444,11 @@ TEST_F(TokenizerTests, LogWithPowerSubScriptAndMultiTokenInput)
     auto subscript = std::make_shared<TokenQueue>();
 
     function = std::make_shared<Function>("log");
-    subExpr->push(std::make_shared<LeftParenthesis>());
+
     
     subExpr->push(std::make_shared<Variable>("x"));
     subExpr->push(std::make_shared<Operator>("+"));
     subExpr->push(std::make_shared<Number>("7",7));
-    subExpr->push(std::make_shared<RightParenthesis>());
     
 
     function->setSubExpr(subExpr);

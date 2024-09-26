@@ -146,7 +146,7 @@ void Function::setSubscript(std::shared_ptr<Number> base)
 }
 void Function::setExponent(std::shared_ptr<TokenQueue> exponent)
 {
-    this->subExpr = exponent;
+    this->exponent = exponent;
 }
 std::shared_ptr<TokenQueue> Function::getExponent()
 {
