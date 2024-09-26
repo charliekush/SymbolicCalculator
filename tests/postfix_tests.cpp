@@ -20,7 +20,7 @@
 
 
 
-class PostFixTessts : public ::testing::Test
+class PostFixTests : public ::testing::Test
 {
 protected:
     std::unique_ptr<Tokenizer> parser;
@@ -81,62 +81,62 @@ protected:
 
 };
 
-TEST_F(PostFixTessts, SimpleAddition) {
+TEST_F(PostFixTests, SimpleAddition) {
     input = "3+5";
     expected = {"3", "5", "+"};
     check();
 }
 
-TEST_F(PostFixTessts, SimpleSubtraction) {
+TEST_F(PostFixTests, SimpleSubtraction) {
     input = "10-2";
     expected = {"10", "2", "-"};
     check();
 }
 
-TEST_F(PostFixTessts, UnaryMinus) {
+TEST_F(PostFixTests, UnaryMinus) {
     input = "-3+5";
     expected = {"-3", "5", "+"};
     check();
 }
 
-TEST_F(PostFixTessts, UnaryMinusBeforeParenthesis) {
+TEST_F(PostFixTests, UnaryMinusBeforeParenthesis) {
     input = "-(2+3)";
     expected = {"2", "3", "+", "-"};
     check();
 }
 
-TEST_F(PostFixTessts, UnaryMinusAfterOperator) {
+TEST_F(PostFixTests, UnaryMinusAfterOperator) {
     input = "5*-3";
     expected = {"5", "-3", "*"};
     check();
 }
 
-TEST_F(PostFixTessts, FunctionAndOperator) {
+TEST_F(PostFixTests, FunctionAndOperator) {
     input = "cos(0)+sin(0)";
     expected = { "cos", "sin", "+"};
     check();
 }
 
-TEST_F(PostFixTessts, NestedFunctions) {
+TEST_F(PostFixTests, NestedFunctions) {
     input = "sin(cos(0))";
     expected = {"sin"};
     check();
 }
 
-TEST_F(PostFixTessts, ComplexExpression) {
+TEST_F(PostFixTests, ComplexExpression) {
     input = "3+4*2/(1-5)^2^3";
     expected = {"3", "4", "2", "*", "1", "5", "-", "2", "3", "^", "^", 
                                                                     "/", "+"};
     check();
 }
 
-TEST_F(PostFixTessts, MismatchedParentheses) {
+TEST_F(PostFixTests, MismatchedParentheses) {
     input = "(3+5";
     // Expect the test to handle the error or throw an exception
     ASSERT_THROW(check(), std::runtime_error);
 }
 
-TEST_F(PostFixTessts, EmptyInput) {
+TEST_F(PostFixTests, EmptyInput) {
     input = "";
     expected = {};
     check();
