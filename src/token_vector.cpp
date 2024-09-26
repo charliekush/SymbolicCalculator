@@ -69,11 +69,8 @@ void TokenVector::emplace(int idx, std::shared_ptr<Token> token)
     this->container.emplace(this->container.begin(), token);
     
 }
+
 void TokenVector::emplace_back(std::shared_ptr<Token> token)
 {
     this->container.emplace_back(token);
-}
-std::vector<std::shared_ptr<Token>> TokenVector::getVector()
-{
-    return this->container;
 }

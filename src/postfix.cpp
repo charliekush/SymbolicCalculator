@@ -1,8 +1,8 @@
 #include "postfix.hpp"
 
 
-ShuntingYard::ShuntingYard(std::vector<std::shared_ptr<Token>> input)
-                                            : input(input) {}
+ShuntingYard::ShuntingYard(TokenVector input)
+    : input(input) {}
 
 
 
@@ -19,10 +19,10 @@ void ShuntingYard::convert()
     for (int idx = 0; idx < this->input.size(); idx++)
     {
         this->currentToken = this->input[idx];
-        
+
         if (this->currentType() == TokenType::NUMBER)
         {
-                this->output.push(this->currentToken);
+            this->output.push(this->currentToken);
         }
         else if (this->currentType() == TokenType::FUNCTION)
         {
@@ -42,16 +42,19 @@ void ShuntingYard::convert()
             {
                 if (this->operators.size() == 0)
                 {
-                    //! TODO: add error for mismatched parentheses
+                    std::runtime_error("Mismatched parentheses");
+                    exit(1);
                 }
                 this->popToOutput();
             }
             if (this->operators.size() == 0)
             {
-                //! TODO: add error for mismatched parentheses
+                std::runtime_error("Mismatched parentheses");
+                exit(1);
             }
             this->operators.pop();
-            if (this->operators.size() > 0 && this->currentType() == TokenType::FUNCTION)
+            if (this->operators.size() > 0 &&
+                this->currentType() == TokenType::FUNCTION)
             {
                 this->popToOutput();
             }
@@ -61,7 +64,8 @@ void ShuntingYard::convert()
     {
         if (this->operators.top()->getType() == TokenType::LEFTPAREN)
         {
-            //! TODO: add error for mismatched parentheses
+            std::runtime_error("Mismatched parentheses");
+            exit(1);
         }
         this->popToOutput();
     }
@@ -70,7 +74,7 @@ void ShuntingYard::convert()
 void ShuntingYard::handleOperator()
 {
     bool topNotLeftParen, greaterPrecedence, equalLeftAssociativity;
-    
+
     while (this->operators.size() > 0)
     {
         int topPrecedence = this->operators.top()->getPrecedence();
@@ -82,7 +86,7 @@ void ShuntingYard::handleOperator()
         greaterPrecedence = (topPrecedence > currentPrecedence);
 
         equalLeftAssociativity = (topPrecedence == currentPrecedence && currentAssociativity == Associativity::LEFT);
-        
+
         if (!(topNotLeftParen && (greaterPrecedence || equalLeftAssociativity)))
         {
             break;

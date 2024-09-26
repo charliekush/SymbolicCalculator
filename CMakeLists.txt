@@ -14,8 +14,9 @@ set(PROJECT_SOURCE_FILES
     src/token.cpp
     src/MWT.cpp
     src/postfix.cpp
-    src/token_queue.cpp
     src/token_container.cpp
+    src/token_queue.cpp
+    src/token_vector.cpp
     src/expression_node.cpp
     src/expression_tree.cpp
 )

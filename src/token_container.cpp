@@ -88,3 +88,8 @@ void TokenContainer::removeParens()
         this->popFront();
     }
 }
+
+std::vector<std::shared_ptr<Token>> TokenContainer::getVector()
+{
+    return this->container;
+}

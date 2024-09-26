@@ -3,6 +3,7 @@
 
 #include "token.hpp"
 #include "token_queue.hpp"
+#include "token_vector.hpp"
 
 #include <vector>
 #include <stack>
@@ -14,10 +15,10 @@
 class ShuntingYard
 {
 public:
-    ShuntingYard(std::vector<std::shared_ptr<Token>> input);
+    ShuntingYard(TokenVector input);
     TokenQueue getPostfix();
 private:
-    std::vector<std::shared_ptr<Token>> input;
+    TokenVector input;
     std::stack<std::shared_ptr<Token>> operators;
     TokenQueue output;
     std::shared_ptr<Token> currentToken;

@@ -12,6 +12,7 @@
 #include "token.hpp"
 #include "MWT.hpp"
 #include "token_queue.hpp"
+#include "token_vector.hpp"
 
 #include <memory>
 #include <vector>
@@ -34,7 +35,7 @@ public:
      * @brief Tokenizes the input string into a vector of Tokens.
      * @return A vector of Token objects.
      */
-    std::vector<std::shared_ptr<Token>> tokenize();
+    TokenVector tokenize();
     //DEBUG START
     std::string listOutput();
     //DEBUG END
@@ -54,7 +55,7 @@ private:
     //! Length of the input string
     int len;
     std::shared_ptr<MWTNode> mwtRoot;
-    std::vector<std::shared_ptr<Token>> output;
+    TokenVector output;
     int tokensIdx;
 
 
@@ -98,7 +99,7 @@ private:
     /**
      * @brief parse the expression
      *
-     * @return std::vector<std::shared_ptr<Token>>
+     * @return TokenVector of parsed terms
      */
     void parseExpression();
 
@@ -131,7 +132,7 @@ private:
     std::shared_ptr<TokenQueue> getFunctionSubscript();
     std::shared_ptr<TokenQueue> getSubTokens();
     void fixEulers();
-    std::shared_ptr<Token> currentToken() const;
+    std::shared_ptr<Token> currentToken();
     
 
 };

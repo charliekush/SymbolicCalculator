@@ -9,6 +9,7 @@
 #include "token.hpp"
 #include "tokenizer.hpp"
 #include "token_queue.hpp"
+#include "token_vector.hpp"
 #include "lookup.hpp"
 
 #include "test_definitions.hpp"
@@ -17,6 +18,7 @@
 #include <iostream>
 #include <string>
 #include <memory>
+
 
 
 
@@ -31,8 +33,8 @@ protected:
 
     std::vector<std::pair<std::string, TokenType>> expectedPairs;
 
-    std::vector<std::shared_ptr<Token>> actualTokens;
-    std::vector<std::shared_ptr<Token>> expectedTokens;
+    TokenVector actualTokens;
+    TokenVector expectedTokens;
 
     std::shared_ptr<Function> function;
     std::shared_ptr<Variable> variable;
@@ -202,12 +204,11 @@ protected:
         expectedTokens = queue->getVector();
         checkExactTokens(expectedTokens, actualTokens);
     }
-    void checkExactTokens(std::vector<std::shared_ptr<Token>> expectedVec,
-                            std::vector<std::shared_ptr<Token>> actualVec)
+    void checkExactTokens(TokenVector expectedVec,TokenVector actualVec)
     {
-        std::vector<std::shared_ptr<Token>> expectedTempVec = 
+        TokenVector expectedTempVec = 
                 this->expectedTokens;
-        std::vector<std::shared_ptr<Token>> actualTempVec = 
+        TokenVector actualTempVec = 
                 this->actualTokens;
         this->expectedTokens = expectedVec;
         this->actualTokens = actualVec;
@@ -427,10 +428,7 @@ TEST_F(TokenizerTests, CotMixedExpression)
     expectedPairs.emplace_back("*", TokenType::OPERATOR);
     expectedPairs.emplace_back("z", TokenType::VARIABLE);
     expectedPairs.emplace_back("*", TokenType::OPERATOR);
-    expectedPairs.emplace_back("cot", TokenType::FUNCTION);
-    expectedPairs.emplace_back("(", TokenType::LEFTPAREN);
-    expectedPairs.emplace_back("m", TokenType::VARIABLE);
-    expectedPairs.emplace_back(")", TokenType::RIGHTPAREN);
+    expectedPairs.emplace_back("cot(m)", TokenType::FUNCTION);
     
     check();
 }
@@ -462,3 +460,157 @@ TEST_F(TokenizerTests, LogWithPowerSubScriptAndMultiTokenInput)
     checkExactTokens();
 }
 
+/*
+
+TEST_F(TokenizerTests, SinWithSingleVariable)
+{
+    input = "sinx+7";
+
+    auto function = std::make_shared<Function>("sin");
+    auto subExpr = std::make_shared<TokenQueue>();
+
+    subExpr->push(std::make_shared<Variable>("x"));
+    function->setSubExpr(subExpr);
+
+    queue->push(function);
+    queue->push(std::make_shared<Operator>("+"));
+    queue->push(std::make_shared<Number>("7", 7));
+
+    checkExactTokens();
+}
+
+TEST_F(TokenizerTests, SinWithParenthesizedExpression)
+{
+    input = "sin(x+7)";
+
+    auto function = std::make_shared<Function>("sin");
+    auto subExpr = std::make_shared<TokenQueue>();
+
+    subExpr->push(std::make_shared<Variable>("x"));
+    subExpr->push(std::make_shared<Operator>("+"));
+    subExpr->push(std::make_shared<Number>("7", 7));
+
+    function->setSubExpr(subExpr);
+    queue->push(function);
+
+    checkExactTokens();
+}
+
+TEST_F(TokenizerTests, SinWithPowerAndVariable)
+{
+    input = "sin^2x";
+
+    auto function = std::make_shared<Function>("sin");
+    auto subExpr = std::make_shared<TokenQueue>();
+
+    subExpr->push(std::make_shared<Variable>("x"));
+    function->setSubExpr(subExpr);
+
+    queue->push(function);
+    queue->push(std::make_shared<Operator>("^"));
+    queue->push(std::make_shared<Number>("2", 2));
+
+    checkExactTokens();
+}
+
+TEST_F(TokenizerTests, SinWithPowerAndParenthesizedExpression)
+{
+    input = "sin^2(x+7)";
+
+    auto function = std::make_shared<Function>("sin");
+    auto subExpr = std::make_shared<TokenQueue>();
+
+    subExpr->push(std::make_shared<Variable>("x"));
+    subExpr->push(std::make_shared<Operator>("+"));
+    subExpr->push(std::make_shared<Number>("7", 7));
+
+    function->setSubExpr(subExpr);
+    queue->push(function);
+    queue->push(std::make_shared<Operator>("^"));
+    queue->push(std::make_shared<Number>("2", 2));
+
+    checkExactTokens();
+}
+
+TEST_F(TokenizerTests, LogWithSubscriptPowerAndVariable)
+{
+    input = "log_4^2x+7";
+
+    auto function = std::make_shared<Function>("log");
+    auto subExpr = std::make_shared<TokenQueue>();
+
+    subExpr->push(std::make_shared<Variable>("x"));
+    function->setSubExpr(subExpr);
+    function->setSubscript(std::make_shared<Number>("4", 4));
+
+    queue->push(function);
+    queue->push(std::make_shared<Operator>("^"));
+    queue->push(std::make_shared<Number>("2", 2));
+    queue->push(std::make_shared<Operator>("+"));
+    queue->push(std::make_shared<Number>("7", 7));
+
+    checkExactTokens();
+}
+
+TEST_F(TokenizerTests, LogWithPowerSubscriptAndVariable)
+{
+    input = "log^2_4x+7";
+
+    auto function = std::make_shared<Function>("log");
+    auto subExpr = std::make_shared<TokenQueue>();
+
+    subExpr->push(std::make_shared<Variable>("x"));
+    function->setSubExpr(subExpr);
+    function->setSubscript(std::make_shared<Number>("4", 4));
+
+    queue->push(function);
+    queue->push(std::make_shared<Operator>("^"));
+    queue->push(std::make_shared<Number>("2", 2));
+    queue->push(std::make_shared<Operator>("+"));
+    queue->push(std::make_shared<Number>("7", 7));
+
+    checkExactTokens();
+}
+
+TEST_F(TokenizerTests, LogWithSubscriptPowerAndParenthesizedExpression)
+{
+    input = "log_4^2(x+7)";
+
+    auto function = std::make_shared<Function>("log");
+    auto subExpr = std::make_shared<TokenQueue>();
+
+    subExpr->push(std::make_shared<Variable>("x"));
+    subExpr->push(std::make_shared<Operator>("+"));
+    subExpr->push(std::make_shared<Number>("7", 7));
+
+    function->setSubExpr(subExpr);
+    function->setSubscript(std::make_shared<Number>("4", 4));
+
+    queue->push(function);
+    queue->push(std::make_shared<Operator>("^"));
+    queue->push(std::make_shared<Number>("2", 2));
+
+    checkExactTokens();
+}
+
+TEST_F(TokenizerTests, LogWithPowerSubscriptAndParenthesizedExpression)
+{
+    input = "log^2_4(x+7)";
+
+    auto function = std::make_shared<Function>("log");
+    auto subExpr = std::make_shared<TokenQueue>();
+
+    subExpr->push(std::make_shared<Variable>("x"));
+    subExpr->push(std::make_shared<Operator>("+"));
+    subExpr->push(std::make_shared<Number>("7", 7));
+
+    function->setSubExpr(subExpr);
+    function->setSubscript(std::make_shared<Number>("4", 4));
+
+    queue->push(function);
+    queue->push(std::make_shared<Operator>("^"));
+    queue->push(std::make_shared<Number>("2", 2));
+
+    checkExactTokens();
+}
+*/

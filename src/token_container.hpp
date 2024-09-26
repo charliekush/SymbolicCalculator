@@ -26,8 +26,8 @@ public:
     void clear();
     int size();
     bool empty();
-
     void removeParens();
+    std::vector<std::shared_ptr<Token>> getVector();
     
     std::string toString();
     

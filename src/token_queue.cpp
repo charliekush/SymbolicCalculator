@@ -1,23 +1,11 @@
 #include "token_queue.hpp"
 
-TokenQueue::TokenQueue() 
-{
-    this->container = std::vector<std::shared_ptr<Token>>();
-}
 
-
-TokenQueue::TokenQueue(std::vector<std::shared_ptr<Token>> input)
-{
-    this->container = 
-        std::vector<std::shared_ptr<Token>>(input.begin(),input.end());
-}
 
 void TokenQueue::push(std::shared_ptr<Token> token)
 {
     this->container.emplace_back(token);
 }
-
-
 
 std::shared_ptr<Token> TokenQueue::pop()
 {
@@ -41,8 +29,4 @@ std::shared_ptr<Token> TokenQueue::top()
 }
 
 
-std::vector<std::shared_ptr<Token>> TokenQueue::getVector()
-{
-    return this->container;
-}
 

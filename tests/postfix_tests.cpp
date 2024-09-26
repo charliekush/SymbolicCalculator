@@ -28,8 +28,8 @@ protected:
     std::string input;
     std::vector<std::string> expected;
     
-    std::vector<std::shared_ptr<Token>> tokens;
-    std::vector<std::shared_ptr<Token>> postfix;
+    TokenVector tokens;
+    TokenVector postfix;
     
     void SetUp() override {
 
@@ -113,13 +113,13 @@ TEST_F(PostFixTessts, UnaryMinusAfterOperator) {
 
 TEST_F(PostFixTessts, FunctionAndOperator) {
     input = "cos(0)+sin(0)";
-    expected = {"0", "cos", "0", "sin", "+"};
+    expected = { "cos", "sin", "+"};
     check();
 }
 
 TEST_F(PostFixTessts, NestedFunctions) {
     input = "sin(cos(0))";
-    expected = {"0", "cos", "sin"};
+    expected = {"cos", "sin"};
     check();
 }
 
