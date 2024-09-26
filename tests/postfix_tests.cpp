@@ -56,7 +56,7 @@ protected:
         
         postfixConverter = std::make_unique<ShuntingYard>(tokens);
         std::cout << "tokens: \"" << parser->listOutput() << "\"\n";
-        postfix = postfixConverter->getPostfix().getVector();
+        postfix = TokenVector(postfixConverter->getPostfix().getVector());
         
 
 

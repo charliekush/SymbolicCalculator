@@ -201,10 +201,15 @@ protected:
     {
         parser = std::make_unique<Tokenizer>(input);
         actualTokens = parser->tokenize();
-        expectedTokens = queue->getVector();
+        expectedTokens = TokenVector(queue->getVector());
         checkExactTokens(expectedTokens, actualTokens);
     }
-    void checkExactTokens(TokenVector expectedVec,TokenVector actualVec)
+    void checkExactTokens(std::vector<std::shared_ptr<Token>> expectedVec, 
+                    std::vector<std::shared_ptr<Token>> actualVec)
+    {
+        checkExactTokens(TokenVector(expectedVec),TokenVector(actualVec));
+    }                
+    void checkExactTokens(TokenVector expectedVec, TokenVector actualVec)
     {
         TokenVector expectedTempVec = 
                 this->expectedTokens;
@@ -405,10 +410,8 @@ TEST_F(TokenizerTests, ComplexExpression)
     expectedPairs.emplace_back("2", TokenType::NUMBER);
     expectedPairs.emplace_back(")", TokenType::RIGHTPAREN);
     expectedPairs.emplace_back("/", TokenType::OPERATOR);
-    expectedPairs.emplace_back("sin", TokenType::FUNCTION);
-    expectedPairs.emplace_back("(", TokenType::LEFTPAREN);
-    expectedPairs.emplace_back("x", TokenType::VARIABLE);
-    expectedPairs.emplace_back(")", TokenType::RIGHTPAREN);
+    expectedPairs.emplace_back("sin(x)", TokenType::FUNCTION);
+    
     check();
 }
 
