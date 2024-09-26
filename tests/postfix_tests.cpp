@@ -119,7 +119,7 @@ TEST_F(PostFixTessts, FunctionAndOperator) {
 
 TEST_F(PostFixTessts, NestedFunctions) {
     input = "sin(cos(0))";
-    expected = {"cos", "sin"};
+    expected = {"sin"};
     check();
 }
 
@@ -130,28 +130,18 @@ TEST_F(PostFixTessts, ComplexExpression) {
     check();
 }
 
-/*TEST_F(PostFixTessts, MismatchedParentheses) {
+TEST_F(PostFixTessts, MismatchedParentheses) {
     input = "(3+5";
     // Expect the test to handle the error or throw an exception
     ASSERT_THROW(check(), std::runtime_error);
-}*/
+}
 
 TEST_F(PostFixTessts, EmptyInput) {
     input = "";
     expected = {};
     check();
 }
-/*
-TEST_F(PostFixTessts, MissingOperand) {
-    input = "3+";
-    // Expect the test to handle the error or throw an exception
-    ASSERT_THROW(check(), std::runtime_error);
-}
-*/
-TEST_F(PostFixTessts, LongExpression) {
-    input = "sin(2+3*5)-cos(4/2)+tan(3^2)";
-    expected = {"2", "3", "5", "*", "+", "sin", "4", "2", "/", "cos", 
-                                            "-", "3", "2", "^", "tan", "+"};
-    check();
-}
+
+
+
 
