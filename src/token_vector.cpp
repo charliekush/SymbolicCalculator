@@ -1,5 +1,9 @@
 #include "token_vector.hpp"
 
+TokenVector::TokenVector(TokenContainer input)
+{
+    this->container = input.getVector();
+}
 
 std::shared_ptr<Token>& TokenVector::operator[](int index)
 {
@@ -66,7 +70,7 @@ void TokenVector::emplace(int idx, std::shared_ptr<Token> token)
         std::runtime_error(msg.c_str());
         exit(1);
     }
-    this->container.emplace(this->container.begin(), token);
+    this->container.emplace(this->container.begin() + idx, token);
     
 }
 

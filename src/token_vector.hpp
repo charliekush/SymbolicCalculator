@@ -11,7 +11,8 @@
 class TokenVector : public TokenContainer
 {
 public: 
-    
+    TokenVector() = default;
+    TokenVector(TokenContainer input);
     
     std::shared_ptr<Token>& operator[](int);
     void emplace(int idx, std::shared_ptr<Token> token);

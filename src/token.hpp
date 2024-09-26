@@ -16,7 +16,8 @@
 #include <variant>
 
 // Forward declarations 
-class TokenQueue; 
+class TokenVector; 
+class TokenQueue;
 class ExpressionTree;
 
 enum class TokenType

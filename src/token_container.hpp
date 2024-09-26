@@ -20,6 +20,7 @@ protected:
 public:
     TokenContainer();
     TokenContainer(std::vector<std::shared_ptr<Token>> input);
+    
     virtual ~TokenContainer() = default;
     
     
@@ -30,7 +31,6 @@ public:
     std::vector<std::shared_ptr<Token>> getVector();
     
     std::string toString();
-    
     
     
 };

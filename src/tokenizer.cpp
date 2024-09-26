@@ -49,7 +49,6 @@ Tokenizer::Tokenizer(const std::string& input) : input(input)
         this->currentChar = '\0'; // Handle empty this->input
     }
     this->len = this->input.length();
-
 }
 
 TokenVector Tokenizer::tokenize()
@@ -75,7 +74,6 @@ TokenVector Tokenizer::tokenize()
                 this->currentToken()->getStr() == "+"))
         {
             this->handleUnary();
-            this->currentToken() = this->output[this->tokensIdx];
         }
         if (this->currentToken()->getType() == TokenType::VARIABLE)
         {
@@ -85,7 +83,7 @@ TokenVector Tokenizer::tokenize()
         {
             this->handleFunction();
         }
-        this->nextImplicit();
+        
         if (this->currentToken()->getType() == TokenType::FUNCTION)
         {
             std::shared_ptr<Function> func =
@@ -102,6 +100,11 @@ TokenVector Tokenizer::tokenize()
                 }
             }
         }
+    }
+    for (this->tokensIdx = 0; this->tokensIdx < this->output.size();
+                                                    this->tokensIdx++)
+    {
+        this->nextImplicit();
     }
     return this->output;
 }
@@ -464,10 +467,7 @@ void Tokenizer::handleFunction()
     }
     else
     {
-        for (int idx = functionIdx + 1; idx < this->tokensIdx; idx++)
-        {
-            this->output.erase(functionIdx + 1);
-        }
+        this->output.erase(functionIdx + 1, this->tokensIdx + 1);
     }
     func->setSubExpr(subExpr);
     this->tokensIdx = functionIdx;
@@ -564,13 +564,14 @@ void Tokenizer::nextImplicit()
 
     if (this->tokensIdx + 1 < this->output.size())
     {
+        
+        TokenType currentType = this->currentToken()->getType();
         TokenType nextType = this->output[this->tokensIdx + 1]->getType();
         if (Lookup::implicitMultiplication.find(
-            { this->currentToken()->getType(), nextType })
+            {currentType, nextType })
                 != Lookup::implicitMultiplication.end())
         {
-            if (Lookup::implicitMultiplication[
-            {this->currentToken()->getType(), nextType}])
+            if (Lookup::implicitMultiplication[{currentType, nextType}])
             {
                 this->output.emplace(this->tokensIdx + 1,
                                     std::make_shared<Operator>("*"));
