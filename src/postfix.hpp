@@ -16,15 +16,14 @@
 class ShuntingYard
 {
 public:
-    ShuntingYard(TokenVector input);
+    ShuntingYard(TokenContainer input);
     TokenQueue getPostfix();
 private:
     TokenVector input;
-    TokenStack operators;
     TokenQueue output;
+    TokenStack operators;
     std::shared_ptr<Token> currentToken;
-    
-    void convert();
+    TokenQueue convert(TokenVector expression);
     void handleOperator();
     
     TokenType currentType();

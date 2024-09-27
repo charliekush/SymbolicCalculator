@@ -12,6 +12,8 @@ public:
     std::shared_ptr<ExpressionNode> root;
 private:
     std::shared_ptr<ExpressionNode> buildTree(TokenQueue queue);
+    void simplify();
+    
 };
 
 #endif // __EXPRESSION_TREE_HPP__

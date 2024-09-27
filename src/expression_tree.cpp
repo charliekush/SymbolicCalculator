@@ -48,21 +48,12 @@ std::shared_ptr<ExpressionNode> ExpressionTree::buildTree(TokenQueue queue)
         // If the token is a function, pop its arguments and create a subtree
         else if (currentToken->getType() == TokenType::FUNCTION)
         {
+            auto func = std::dynamic_pointer_cast<Function>(currentToken);
+            ExpressionTree subTree(*func->getSubExpr().get());
+            func->setSubExprTree(std::make_shared<ExpressionTree>(subTree));
             std::shared_ptr<ExpressionNode> newNode = 
             std::make_shared<ExpressionNode>(currentToken);
-            std::vector<std::shared_ptr<ExpressionNode>> arguments;
-            // Pop arguments from the stack
-            if (!nodeStack.empty())
-            {
-                arguments.push_back(nodeStack.top());
-                nodeStack.pop();
-            }
             
-            // Add arguments as children to the function node
-            for (auto it = arguments.rbegin(); it != arguments.rend(); ++it)
-            {
-                newNode->addChild((*it));
-            }
 
             // Push the function subtree back onto the stack
             nodeStack.push(newNode);
@@ -77,4 +68,10 @@ std::shared_ptr<ExpressionNode> ExpressionTree::buildTree(TokenQueue queue)
     }
 
     return nullptr; // In case the queue was empty
+}
+
+
+void ExpressionTree::simplify()
+{
+    
 }

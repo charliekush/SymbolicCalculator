@@ -1,32 +1,40 @@
 #include "postfix.hpp"
 
 
-ShuntingYard::ShuntingYard(TokenVector input)
-    : input(input) {}
+ShuntingYard::ShuntingYard(TokenContainer input) 
+{
+    this->input = TokenVector(input.getVector());
+}
 
 
 
 
 TokenQueue ShuntingYard::getPostfix()
 {
-
-    this->convert();
-    return output;
+    return this->convert(this->input);
+    
 }
 
-void ShuntingYard::convert()
+TokenQueue ShuntingYard::convert(TokenVector expression)
 {
+    
+    
     for (int idx = 0; idx < this->input.size(); idx++)
     {
         this->currentToken = this->input[idx];
 
         if (this->currentType() == TokenType::NUMBER)
         {
-            this->output.push(this->currentToken);
+            output.push(this->currentToken);
         }
         else if (this->currentType() == TokenType::FUNCTION)
         {
-            this->operators.push(this->currentToken);
+            auto func = std::dynamic_pointer_cast<Function>(this->currentToken);
+            ShuntingYard postfixInput(func->getSubExpr()->getVector());
+            auto subExpr = 
+                    std::make_shared<TokenQueue>(postfixInput.getPostfix());
+            func->setSubExpr(subExpr);
+            operators.push(this->currentToken);
         }
         else if (this->currentType() == TokenType::OPERATOR)
         {
@@ -34,35 +42,35 @@ void ShuntingYard::convert()
         }
         else if (this->currentType() == TokenType::LEFTPAREN)
         {
-            this->operators.push(this->currentToken);
+            operators.push(this->currentToken);
         }
         else if (this->currentType() == TokenType::RIGHTPAREN)
         {
-            while (this->operators.top()->getType() != TokenType::LEFTPAREN)
+            while (operators.top()->getType() != TokenType::LEFTPAREN)
             {
-                if (this->operators.size() == 0)
+                if (operators.size() == 0)
                 {
                     std::runtime_error("Mismatched parentheses");
                     exit(1);
                 }
                 this->popToOutput();
             }
-            if (this->operators.size() == 0)
+            if (operators.size() == 0)
             {
                 std::runtime_error("Mismatched parentheses");
                 exit(1);
             }
-            this->operators.pop();
-            if (this->operators.size() > 0 &&
+            operators.pop();
+            if (operators.size() > 0 &&
                 this->currentType() == TokenType::FUNCTION)
             {
                 this->popToOutput();
             }
         }
     }
-    while (this->operators.size() > 0)
+    while (operators.size() > 0)
     {
-        if (this->operators.top()->getType() == TokenType::LEFTPAREN)
+        if (operators.top()->getType() == TokenType::LEFTPAREN)
         {
             std::runtime_error("Mismatched parentheses");
             exit(1);
@@ -75,13 +83,13 @@ void ShuntingYard::handleOperator()
 {
     bool topNotLeftParen, greaterPrecedence, equalLeftAssociativity;
 
-    while (this->operators.size() > 0)
+    while (operators.size() > 0)
     {
-        int topPrecedence = this->operators.top()->getPrecedence();
+        int topPrecedence = operators.top()->getPrecedence();
         int currentPrecedence = this->currentToken->getPrecedence();
         Associativity currentAssociativity = this->currentToken->getAssociativity();
 
-        topNotLeftParen = this->operators.top()->getType() != TokenType::LEFTPAREN;
+        topNotLeftParen = operators.top()->getType() != TokenType::LEFTPAREN;
 
         greaterPrecedence = (topPrecedence > currentPrecedence);
 
@@ -92,19 +100,19 @@ void ShuntingYard::handleOperator()
             break;
         }
 
-        this->output.push(this->operators.top());
-        this->operators.pop();
+        output.push(operators.top());
+        operators.pop();
     }
 
-    this->operators.push(this->currentToken);
+    operators.push(this->currentToken);
 }
 
 
 
 void ShuntingYard::popToOutput()
 {
-    this->output.push(operators.top());
-    this->operators.pop();
+    output.push(operators.top());
+    operators.pop();
 }
 
 TokenType ShuntingYard::currentType()
