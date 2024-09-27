@@ -493,7 +493,7 @@ TEST_F(TokenizerTests, SinWithSingleVariable)
 
     checkExactTokens();
 }
-/*
+
 TEST_F(TokenizerTests, SinWithParenthesizedExpression)
 {
     input = "sin(x+7)";
@@ -628,4 +628,3 @@ TEST_F(TokenizerTests, LogWithPowerSubscriptAndParenthesizedExpression)
 
     checkExactTokens();
 }
-*/

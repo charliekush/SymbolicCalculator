@@ -4,6 +4,7 @@
 #include "token.hpp"
 #include "token_queue.hpp"
 #include "token_vector.hpp"
+#include "token_stack.hpp"
 
 #include <vector>
 #include <stack>
@@ -19,7 +20,7 @@ public:
     TokenQueue getPostfix();
 private:
     TokenVector input;
-    std::stack<std::shared_ptr<Token>> operators;
+    TokenStack operators;
     TokenQueue output;
     std::shared_ptr<Token> currentToken;
     

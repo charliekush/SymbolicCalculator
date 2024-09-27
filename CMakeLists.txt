@@ -17,6 +17,7 @@ set(PROJECT_SOURCE_FILES
     src/token_container.cpp
     src/token_queue.cpp
     src/token_vector.cpp
+    src/token_stack.cpp
     src/expression_node.cpp
     src/expression_tree.cpp
 )
