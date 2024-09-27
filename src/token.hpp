@@ -65,10 +65,12 @@ public:
      * @param precedence The precedence of the operator.
      * @param associativity The associativity of the operator.
      */
-    SymbolProperties(int precedence, Associativity associativity);
+    SymbolProperties(int precedence, Associativity associativity, 
+                                                    bool commutative);
 
-    int precedence;                //!< The precedence of the operator
-    Associativity associativity;   //!< Associativity of the operator
+    int precedence;                 //!< The precedence of the operator
+    Associativity associativity;    //!< Associativity of the operator
+    bool commutative;               //!< Commutativity of the operator
 };
 
 /**
@@ -126,6 +128,14 @@ public:
      * @return Associativity of a token
      */
     Associativity getAssociativity();
+
+    /**
+     * @brief determines whether operator is commutative
+     * 
+     * @return true if commutative
+     * @return false if not
+     */
+    bool isCommutative();
 
 
     /**

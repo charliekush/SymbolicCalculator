@@ -27,7 +27,7 @@ Token::Token(TokenType type, const std::string& str) : type(type), str(str)
     }
     else
     {
-        properties = SymbolProperties(0, Associativity::NONE);
+        properties = SymbolProperties(0, Associativity::NONE, false);
     }
     this->setNegative(false);
 }
@@ -66,6 +66,10 @@ Associativity Token::getAssociativity()
 {
     return properties.associativity;
 }
+bool Token::isCommutative()
+{
+    return properties.commutative;
+}
 /**
  * @brief sets the isNegative flag to indicate this token represents a
  * negative value.
@@ -98,6 +102,7 @@ SymbolProperties::SymbolProperties()
 {
     this->precedence = -1;
     this->associativity = Associativity::LEFT;
+    this->commutative = false;
 }
 
 /**
@@ -105,9 +110,10 @@ SymbolProperties::SymbolProperties()
  * @param precedence The precedence of the operator.
  * @param associativity The associativity of the operator.
  */
-SymbolProperties::SymbolProperties(int precedence, Associativity associativity) :
-    precedence(precedence), associativity(associativity) {
-}
+SymbolProperties::SymbolProperties(int precedence, Associativity associativity,
+                bool commutative) : 
+    precedence(precedence), associativity(associativity), 
+        commutative(commutative) {}
 
 
 
