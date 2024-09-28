@@ -17,18 +17,18 @@ std::shared_ptr<ExpressionNode> ExpressionTree::buildTree(TokenQueue queue)
 
         // If the token is a number or variable, 
         // create a new node and push it onto the stack
-        if (currentToken->getType() == TokenType::NUMBER 
+        if (currentToken->getType() == TokenType::NUMBER
                         || currentToken->getType() == TokenType::VARIABLE)
         {
-            std::shared_ptr<ExpressionNode> newNode = 
-                            std::make_shared<ExpressionNode>(currentToken);
+            std::shared_ptr<ExpressionNode> newNode =
+                std::make_shared<ExpressionNode>(currentToken);
             nodeStack.push(newNode);
         }
         // If the token is an operator, pop two operands and create a new subtree
         else if (currentToken->getType() == TokenType::OPERATOR)
         {
-            std::shared_ptr<ExpressionNode> newNode = 
-                            std::make_shared<ExpressionNode>(currentToken);
+            std::shared_ptr<ExpressionNode> newNode =
+                std::make_shared<ExpressionNode>(currentToken);
 
             // Pop the right operand first, then the left operand
             if (!nodeStack.empty())
@@ -51,14 +51,13 @@ std::shared_ptr<ExpressionNode> ExpressionTree::buildTree(TokenQueue queue)
             auto func = std::dynamic_pointer_cast<Function>(currentToken);
             ExpressionTree subTree(*func->getSubExpr().get());
             func->setSubExprTree(std::make_shared<ExpressionTree>(subTree));
-            std::shared_ptr<ExpressionNode> newNode = 
-            std::make_shared<ExpressionNode>(currentToken);
-            
+            std::shared_ptr<ExpressionNode> newNode =
+                std::make_shared<ExpressionNode>(currentToken);
 
             // Push the function subtree back onto the stack
             nodeStack.push(newNode);
         }
-    
+
     }
 
     // The final node on the stack will be the root of the expression tree
@@ -71,7 +70,29 @@ std::shared_ptr<ExpressionNode> ExpressionTree::buildTree(TokenQueue queue)
 }
 
 
-void ExpressionTree::simplify()
+
+std::vector<std::shared_ptr<ExpressionNode>>
+ExpressionTree::getLeaves(std::shared_ptr<ExpressionNode> root)
 {
-    
+    std::vector<std::shared_ptr<ExpressionNode>> leaves;
+    this->getLeavesHelper(root, leaves);
+    return leaves;
+}
+void ExpressionTree::getLeavesHelper(std::shared_ptr<ExpressionNode> node,
+                std::vector<std::shared_ptr<ExpressionNode>>& leaves) {
+    if (!node)
+    {
+        return;
+    }
+
+    // If the node is a leaf (no children), add it to the list
+    if (!node->getLeft() && !node->getRight())
+    {
+        leaves.emplace_back(node);
+        return;
+    }
+
+    // Recursively gather leaves from the left and right subtrees
+    this->getLeavesHelper(node->getLeft(), leaves);
+    this->getLeavesHelper(node->getRight(), leaves);
 }

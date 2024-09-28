@@ -5,6 +5,9 @@
 #include "token_queue.hpp"
 #include "expression_node.hpp"
 
+#include <set>
+
+
 class ExpressionTree
 {
 public:
@@ -12,8 +15,11 @@ public:
     std::shared_ptr<ExpressionNode> root;
 private:
     std::shared_ptr<ExpressionNode> buildTree(TokenQueue queue);
-    void simplify();
-    
+
+    std::vector<std::shared_ptr<ExpressionNode>>
+        getLeaves(std::shared_ptr<ExpressionNode> root);
+    void getLeavesHelper(std::shared_ptr<ExpressionNode> node,
+                std::vector<std::shared_ptr<ExpressionNode>>& leaves);
 };
 
-#endif // __EXPRESSION_TREE_HPP__
+#endif //__EXPRESSION_TREE_HPP__
