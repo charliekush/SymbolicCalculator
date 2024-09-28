@@ -23,11 +23,13 @@ private:
     TokenQueue output;
     TokenStack operators;
     std::shared_ptr<Token> currentToken;
-    TokenQueue convert(TokenVector expression);
+    void convert(TokenVector expression);
     void handleOperator();
-    
+
+
     TokenType currentType();
     void popToOutput();
-    
+
+
 };
 #endif // __POSTFIX_HPP__

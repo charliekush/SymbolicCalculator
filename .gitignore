@@ -303,3 +303,4 @@ $RECYCLE.BIN/
 
 # End of https://www.toptal.com/developers/gitignore/api/c++,cmake,linux,macos,python,doxygen,windows
 external/
+ignore
