@@ -1,7 +1,7 @@
 #include "postfix.hpp"
 
 
-ShuntingYard::ShuntingYard(TokenContainer input) 
+ShuntingYard::ShuntingYard(TokenContainer input)
 {
     this->input = TokenVector(input.getVector());
 }
@@ -11,14 +11,12 @@ ShuntingYard::ShuntingYard(TokenContainer input)
 
 TokenQueue ShuntingYard::getPostfix()
 {
-    return this->convert(this->input);
-    
+    this->convert(this->input);
+    return this->output;
 }
 
-TokenQueue ShuntingYard::convert(TokenVector expression)
+void ShuntingYard::convert(TokenVector expression)
 {
-    
-    
     for (int idx = 0; idx < this->input.size(); idx++)
     {
         this->currentToken = this->input[idx];
@@ -31,8 +29,8 @@ TokenQueue ShuntingYard::convert(TokenVector expression)
         {
             auto func = std::dynamic_pointer_cast<Function>(this->currentToken);
             ShuntingYard postfixInput(func->getSubExpr()->getVector());
-            auto subExpr = 
-                    std::make_shared<TokenQueue>(postfixInput.getPostfix());
+            auto subExpr =
+                std::make_shared<TokenQueue>(postfixInput.getPostfix());
             func->setSubExpr(subExpr);
             operators.push(this->currentToken);
         }
