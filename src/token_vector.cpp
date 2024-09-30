@@ -1,5 +1,8 @@
 #include "token_vector.hpp"
 
+#include <stdexcept>
+
+
 TokenVector::TokenVector(TokenContainer input)
 {
     this->container = input.getVector();
