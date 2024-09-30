@@ -1,5 +1,7 @@
 #include "postfix.hpp"
 
+#include <stdexcept>
+
 
 ShuntingYard::ShuntingYard(TokenContainer input)
 {
