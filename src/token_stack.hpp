@@ -1,6 +1,5 @@
-#ifndef __TOKEN_QUEUE_HPP__
-#define __TOKEN_QUEUE_HPP__
-
+#ifndef __TOKEN_STACK_HPP__
+#define __TOKEN_STACK_HPP__
 #include "token_container.hpp"
 #include "token.hpp"
 
@@ -8,7 +7,7 @@
 #include <string>
 #include <memory>
 
-class TokenQueue : public TokenContainer
+class TokenStack : public TokenContainer
 {
 public: 
     
@@ -17,4 +16,4 @@ public:
     void push(std::shared_ptr<Token> token);
    
 };
-#endif // __TOKEN_QUEUE_HPP__
+#endif // __TOKEN_STACK_HPP__

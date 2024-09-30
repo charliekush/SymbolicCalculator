@@ -8,7 +8,13 @@
  */
 
 #include "tokenizer.hpp"
+#include "token_queue.hpp"
+#include "lookup.hpp"
+
+#include <stdexcept>
 #include <iostream>
+
+
 
  /**
   * @class Tokenizer
@@ -30,7 +36,7 @@
 Tokenizer::Tokenizer(const std::string& input) : input(input)
 {
 
-    constructTree();
+    this->mwtRoot = this->mwtRoot->constructMWT();
     this->substr = "";
     if (!this->input.empty())
     {
@@ -43,42 +49,70 @@ Tokenizer::Tokenizer(const std::string& input) : input(input)
         this->currentChar = '\0'; // Handle empty this->input
     }
     this->len = this->input.length();
-
 }
 
-std::vector<std::shared_ptr<Token>> Tokenizer::tokenize()
+TokenVector Tokenizer::tokenize()
 {
+
     this->parseExpression();
-    return this->output;
-}
-void Tokenizer::constructTree()
-{
-    this->mwtRoot = std::make_shared<MWTNode>('\0', false);
-    for (const auto& entry : symbolTable)
+
+
+    for (this->tokensIdx = 0; this->tokensIdx < this->output.size();
+                                                    this->tokensIdx++)
     {
-        // Start from the root of the trie
-        std::shared_ptr<MWTNode> current = this->mwtRoot;
 
-        // Traverse through the characters in the entry key
-        for (const char& letter : entry.first)
+        if (this->currentToken()->getType() == TokenType::VARIABLE &&
+            this->currentToken()->getStr() == "e")
         {
-            // Check if the child node exists
-            std::shared_ptr<MWTNode> child = current->getChild(letter);
+            fixEulers();
 
-            if (!child) // If the child does not exist, create it
-            {
-                child = std::make_shared<MWTNode>(letter, false);
-                current->children.push_back(child);
-            }
-
-            // Move to the child node
-            current = child;
         }
 
-        // Mark the end of a valid function/operator
-        current->isWord = true;
+        // check for unary operators
+        if (this->currentToken()->getType() == TokenType::OPERATOR &&
+            (this->currentToken()->getStr() == "-" ||
+                this->currentToken()->getStr() == "+"))
+        {
+            this->handleUnary();
+        }
+        if (this->currentToken()->getType() == TokenType::VARIABLE)
+        {
+            this->handleVariable();
+        }
+        if (this->currentToken()->getType() == TokenType::FUNCTION)
+        {
+            this->handleFunction();
+        }
+        
+        if (this->currentToken()->getType() == TokenType::FUNCTION)
+        {
+            std::shared_ptr<Function> func =
+                std::dynamic_pointer_cast<Function>(this->currentToken());
+            std::shared_ptr<TokenQueue> exponent = func->getExponent();
+            if (exponent)
+            {
+                int exponentIdx = this->tokensIdx + 1;
+                while (!exponent->empty())
+                {
+                    this->output.emplace(exponentIdx, exponent->pop());
+                    exponentIdx++;
+
+                }
+            }
+        }
     }
+    for (this->tokensIdx = 0; this->tokensIdx < this->output.size();
+                                                    this->tokensIdx++)
+    {
+        this->nextImplicit();
+    }
+    return this->output;
 }
+std::shared_ptr<Token> Tokenizer::currentToken()
+{
+    return this->output[this->tokensIdx];
+}
+
 char Tokenizer::peek() const
 {
     int idx = this->currentIndex + 1;
@@ -124,22 +158,18 @@ void Tokenizer::parseExpression()
 {
     while (this->currentChar != '\0')
     {
-        this->listOutput();
+        //this->listOutput();
         if (this->currentChar >= '0' && this->currentChar <= '9')
         {
+            this->clearSubstr();
             this->output.emplace_back(
                     std::make_shared<Number>(this->parseNumber()));
-            this->clearSubstr();
+
         }
         else if (this->currentChar == ' ')
         {
             this->clearSubstr();
             this->getNext();
-
-        }
-        else if (this->currentChar == '-')
-        {
-            this->handleMinus();
 
         }
         else
@@ -148,48 +178,59 @@ void Tokenizer::parseExpression()
             this->getNext();
         }
         this->checkSubstr();
+
     }
     // Handle any remaining this->substr (if needed)
     if (!this->substr.empty())
     {
-        clearSubstr();
+        this->clearSubstr();
     }
+
 }
-void Tokenizer::handleMinus()
+void Tokenizer::handleUnary()
 {
-    this->clearSubstr();
-    bool lastWasOperator = false;
+
+
+    bool unary = (this->tokensIdx == 0);
 
     // Check if the previous character was an operator or left parenthesis
-    if (symbolTable.find(std::string(1, this->peekBack())) != symbolTable.end())
+    if (!unary)
     {
-        lastWasOperator = (symbolTable[std::string(1, this->peekBack())].first == OPERATOR) ||
-                          (symbolTable[std::string(1, this->peekBack())].first == LEFTPAREN);
+        std::shared_ptr<Token>& lastToken = this->output[this->tokensIdx - 1];
+        unary = (lastToken->getType() == TokenType::OPERATOR) ||
+            (lastToken->getType() == TokenType::LEFTPAREN);
+
     }
 
-    if (this->peekBack() == '\0' || lastWasOperator)
+
+    if (unary)
     {
-        if (this->peek() >= '0' && this->peek() <= '9')
+        if (this->output.size() > this->tokensIdx + 1)
         {
-            this->checkImplicitMultiplication();
-            this->getNext(); // Move past the '-'
-            std::shared_ptr<Number> newNum = std::make_shared<Number>(this->parseNumber());
-            newNum->flipSign(); // Flip the sign of the number
-            this->output.emplace_back(newNum);
+            if (!(this->output[this->tokensIdx + 1]->getType() ==
+                TokenType::OPERATOR &&
+                (this->output[this->tokensIdx - 1]->getType() ==
+                    TokenType::OPERATOR)))
+            {
+                if (this->currentToken()->getStr() == "-")
+                {
+                    this->output[this->tokensIdx + 1]->flipSign();
+                }
+                this->output.erase(this->tokensIdx);
+            }
+            {
+                //!TODO: error for triple operator
+            }
+
+
         }
         else
         {
-            this->substr += '-';
-            this->getNext();
+            //! TODO: add error for extra plus/minus
         }
+
     }
-    else
-    {
-        // Binary minus (operator)
-        auto minusToken = std::make_shared<Operator>("-");
-        this->output.emplace_back(minusToken);
-        this->getNext();
-    }
+
 }
 Number Tokenizer::parseNumber()
 {
@@ -210,7 +251,7 @@ Number Tokenizer::parseNumber()
             }
             else
             {
-                //! TODO add error handling
+                std::runtime_error("Multiple decimal points in number");
             }
         }
         this->getNext();
@@ -235,40 +276,24 @@ void Tokenizer::clearSubstr()
     this->checkSubstr();
     for (int idx = 0; idx < this->substr.length(); idx++)
     {
-        this->checkImplicitMultiplication();
+
         this->output.emplace_back(std::make_shared<Variable>(
             std::string(1, this->substr[idx])));
 
-        this->getSubSript(idx);
 
 
     }
     this->substr.clear();
-
 }
 
-void Tokenizer::checkImplicitMultiplication()
-{
-    if (this->output.size()
-           && this->output.back().get()->getType() != OPERATOR
-           && this->output.back().get()->getType() != FUNCTION
-           && this->output.back().get()->getType() != LEFTPAREN)
-    {
-        this->output.emplace_back(std::make_shared<Operator>("*"));
-    }
-}
 
 void Tokenizer::checkSubstr()
 {
     if (this->substr.empty())
-    {
         return;
-    }
-
     std::shared_ptr<MWTNode> current = mwtRoot;
     int lastMatchedIndex = -1;
     std::string matchedString;
-
     // Traverse the substring to find the longest match in the trie
     for (int idx = 0; idx < this->substr.length(); idx++)
     {
@@ -278,7 +303,6 @@ void Tokenizer::checkSubstr()
         {
             current = current->getChild(ch);
             matchedString += ch;
-
             if (current->isWord)
             {
                 lastMatchedIndex = idx;
@@ -301,86 +325,282 @@ void Tokenizer::checkSubstr()
         for (int idx = 0; idx < lastMatchedIndex + 1 - matchedString.length();
                                                                     idx++)
         {
-            std::string newVar;
-            newVar += this->substr[idx] +
-                this->getSubSript(startIndexInInput + idx);
-            this->checkImplicitMultiplication();
-            this->output.emplace_back(std::make_shared<Variable>(newVar));
-            idx += newVar.length() > 0 ? newVar.length() - 1 : 0;
-            if (idx > lastMatchedIndex)
-            {
-                //! TODO: throw error for malformed subscript
-            }
+
+
+            this->output.emplace_back(
+                std::make_shared<Variable>(std::string(1, this->substr[idx])));
         }
 
         // Process the matched string as a function/operator
-        auto match = symbolTable[matchedString];
-        if (match.first == FUNCTION)
+        auto match = Lookup::symbolTable[matchedString];
+        if (match.first == TokenType::FUNCTION)
         {
-            this->checkImplicitMultiplication();
-            this->output.emplace_back(std::make_shared<Function>(matchedString));
+            this->output.emplace_back(
+                                std::make_shared<Function>(matchedString));
+
         }
-        else if (match.first == OPERATOR)
+        else if (match.first == TokenType::OPERATOR)
         {
-            this->output.emplace_back(std::make_shared<Operator>(matchedString));
+            this->output.emplace_back(
+                                std::make_shared<Operator>(matchedString));
         }
-        else if (match.first == LEFTPAREN)
+        else if (match.first == TokenType::LEFTPAREN)
         {
-            this->checkImplicitMultiplication();
             this->output.emplace_back(std::make_shared<LeftParenthesis>());
         }
-        else if (match.first == RIGHTPAREN)
+        else if (match.first == TokenType::UNDERSCORE)
         {
-            this->output.emplace_back(std::make_shared<RightParenthesis>());
+            this->output.emplace_back(
+                        std::make_shared<Token>(TokenType::UNDERSCORE, "_"));
         }
+        else if (match.first == TokenType::RIGHTPAREN)
+            this->output.emplace_back(std::make_shared<RightParenthesis>());
         // Remove processed part from this->substr
         this->substr.erase(0, lastMatchedIndex + 1);
     }
-
-
 }
 
-
-
-std::string Tokenizer::getSubSript(int idx)
+void Tokenizer::handleFunction()
 {
-    std::string subscript = "";
-    int tmpIdx = this->currentIndex;
-    this->currentIndex = idx;
+    std::shared_ptr<Token>& token = this->output[this->tokensIdx];
+    std::shared_ptr<Function> func = std::dynamic_pointer_cast<Function>(token);
 
-    if (this->peek() != '_')
-    {
-        this->currentIndex = tmpIdx;
-        return subscript;
-    }
-    this->getNext();
-    subscript += this->currentChar;
-    this->getNext();
+    // Initialize a queue to store subexpression tokens
+    std::shared_ptr<TokenQueue> subExpr = std::make_shared<TokenQueue>();
+    std::shared_ptr<TokenQueue> subScript = std::make_shared<TokenQueue>();
+    std::shared_ptr<TokenQueue> exponent = std::make_shared<TokenQueue>();
+    bool hasParentheses = false;
+    int functionIdx = this->tokensIdx;
 
-    if (this->peek() == '\0')
+    bool foundSubstring = false;
+    bool foundExponent = false;
+    bool foundSubExpr = false;
+
+    this->tokensIdx++;
+
+    // Check if function is given argument
+    if (this->tokensIdx == this->output.size())
     {
-        this->currentIndex = tmpIdx;
-        return "";
+        subExpr->push(std::make_shared<Number>("1", 1));
+        foundSubExpr = true;
+    }
+    else if (this->currentToken()->getType() == TokenType::OPERATOR &&
+                    this->currentToken()->getStr() != "^")
+    {
+        subExpr->push(std::make_shared<Number>("1", 1));
+        foundSubExpr = true;
+    }
+    if (!foundSubExpr)
+    {
+        for (int counter = 0; counter < 2; counter++)
+        {
+            if (this->tokensIdx == this->output.size())
+            {
+
+                return;
+            }
+            if (!(this->currentToken()->getStr() == "^"
+                || this->currentToken()->getType() == TokenType::UNDERSCORE))
+            {
+                break;
+            }
+            if (!foundSubstring &&
+                    this->currentToken()->getType() == TokenType::UNDERSCORE)
+            {
+                if (func->getStr() != "log")
+                {
+                    std::string errorMsg =
+                        "Only log function can have subscript, not \"" +
+                        func->getStr() + "\"!";
+                    std::runtime_error(errorMsg.c_str());
+                }
+                int underscoreIdx = this->tokensIdx++;
+                if (this->tokensIdx == this->output.size())
+                {
+                    std::runtime_error("No subscript found!");
+                    return;
+                }
+                subScript = this->getSubTokens();
+                if (subScript->size() == 1 &&
+                        subScript->top()->getType() == TokenType::NUMBER)
+                {
+                    func->setSubscript(
+                        std::dynamic_pointer_cast<Number>(subScript->top()));
+
+                }
+                else
+                {
+                    std::runtime_error(
+                        "Bad subscript! logarithm must have numeric base");
+                }
+
+                this->output.erase(underscoreIdx, this->tokensIdx + 1);
+                this->tokensIdx = underscoreIdx;
+            }
+            // proccess exponent
+            else
+            {
+
+                int exponentIdx = this->tokensIdx++;
+
+                exponent = this->getSubTokens();
+                if (exponent->size() == 0)
+                {
+                    std::runtime_error("No exponent found!");
+                }
+                func->setExponent(exponent);
+                this->output.erase(exponentIdx, this->tokensIdx + 1);
+                this->tokensIdx = exponentIdx;
+            }
+        }
+        subExpr = this->getSubTokens();
+
+
+
+
     }
 
-    if (this->currentChar != '{')
-    {
-        subscript += this->peek();
-        this->currentIndex = tmpIdx;
-        return subscript;
-    }
-    while (this->currentChar != '\0' && this->currentChar != '}')
-    {
-        subscript += this->currentChar;
-        this->getNext();
-    }
-    this->currentIndex = tmpIdx;
-    return subscript;
 
+    if (subExpr->size() == 0)
+    {
+        subExpr->push(std::make_shared<Number>("1", 1));
+    }
+    else
+    {
+        this->output.erase(functionIdx + 1, this->tokensIdx + 1);
+    }
+    func->setSubExpr(subExpr);
+    this->tokensIdx = functionIdx;
+    token = func;
+
+
+
+
+}
+
+std::shared_ptr<TokenQueue> Tokenizer::getSubTokens()
+{
+    std::shared_ptr<TokenQueue> subExpr = std::make_shared<TokenQueue>();
+    int parenCount = 0;
+
+    // Iterate through the tokens starting at the given index
+    for (; this->tokensIdx < this->output.size(); this->tokensIdx++)
+    {
+        std::shared_ptr<Token>& token = this->output[this->tokensIdx];
+
+        // Push current token to the subexpression
+        subExpr->push(token);
+
+        // Check for left parenthesis and increment the count
+        if (token->getType() == TokenType::LEFTPAREN)
+        {
+            ++parenCount;
+        }
+        // Check for right parenthesis and decrement the count
+        else if (token->getType() == TokenType::RIGHTPAREN)
+        {
+            --parenCount;
+        }
+
+
+        // If parentheses close and we reach the end of the subexpression
+        if (parenCount == 0)
+        {
+            break;
+            this->tokensIdx++;
+        }
+    }
+    if (parenCount != 0)
+    {
+        //! TODO: implement error handling for mismatched parens
+        subExpr->clear();
+    }
+
+
+
+    subExpr->removeParens();
+    return subExpr;
+}
+
+
+void Tokenizer::handleVariable()
+{
+    std::shared_ptr<Token>& token = this->output[this->tokensIdx];
+}
+void Tokenizer::handleSubscript()
+{
+    std::shared_ptr<Token>& token = this->output[this->tokensIdx];
 }
 
 
 
+void Tokenizer::fixEulers()
+{
+    bool sign = this->currentToken()->isNegative();
+    std::shared_ptr<Token> token = std::make_shared<Function>("exp");
+    token->setNegative(sign);
+    if (this->tokensIdx == this->output.size() - 1)
+    {
+        this->output.emplace_back(std::make_shared<LeftParenthesis>());
+        this->output.emplace_back(std::make_shared<Number>("1", 1));
+        this->output.emplace_back(std::make_shared<RightParenthesis>());
+    }
+    else if (!(this->output[this->tokensIdx + 1]->getType() == TokenType::OPERATOR
+        && this->output[this->tokensIdx + 1]->getStr() != "^"))
+    {
+        auto itr = this->tokensIdx + 1;
+        this->output.emplace(itr, std::make_shared<RightParenthesis>());
+        this->output.emplace(itr, std::make_shared<Number>("1", 1));
+        this->output.emplace(itr, std::make_shared<LeftParenthesis>());
+    }
+
+
+    token = this->output[this->tokensIdx];
+}
+
+
+void Tokenizer::nextImplicit()
+{
+
+    if (this->tokensIdx + 1 < this->output.size())
+    {
+        
+        TokenType currentType = this->currentToken()->getType();
+        TokenType nextType = this->output[this->tokensIdx + 1]->getType();
+        if (Lookup::implicitMultiplication.find(
+            {currentType, nextType })
+                != Lookup::implicitMultiplication.end())
+        {
+            if (Lookup::implicitMultiplication[{currentType, nextType}])
+            {
+                this->output.emplace(this->tokensIdx + 1,
+                                    std::make_shared<Operator>("*"));
+            }
+        }
+        else
+        {
+            try
+            {
+                std::string msg = "Types " +
+                    Lookup::getTokenType(this->currentToken()->getType()) +
+                    " and " +
+                    Lookup::getTokenType(nextType) +
+                    " should not be next to each other. Found at " +
+                    this->currentToken()->getFullStr() +
+                    " and " +
+                    this->output[this->tokensIdx + 1]->getFullStr() + "\n";
+
+            }
+            catch (const std::exception& e)
+            {
+                std::cerr << e.what() << '\n';
+            }
+
+        }
+    }
+
+
+}
 //DEBUG START
 std::string Tokenizer::listOutput()
 {

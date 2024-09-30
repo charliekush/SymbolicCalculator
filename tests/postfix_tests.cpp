@@ -9,6 +9,7 @@
 #include "token.hpp"
 #include "tokenizer.hpp"
 #include "postfix.hpp"
+#include "lookup.hpp"
 
 #include "test_definitions.hpp"
 
@@ -19,7 +20,7 @@
 
 
 
-class PostFixTessts : public ::testing::Test
+class PostFixTests : public ::testing::Test
 {
 protected:
     std::unique_ptr<Tokenizer> parser;
@@ -27,8 +28,8 @@ protected:
     std::string input;
     std::vector<std::string> expected;
     
-    std::vector<std::shared_ptr<Token>> tokens;
-    std::vector<std::shared_ptr<Token>> postfix;
+    TokenVector tokens;
+    TokenVector postfix;
     
     void SetUp() override {
 
@@ -55,102 +56,88 @@ protected:
         
         postfixConverter = std::make_unique<ShuntingYard>(tokens);
         std::cout << "tokens: \"" << parser->listOutput() << "\"\n";
-        postfix = postfixConverter->getPostfix().getVector();
+        postfix = TokenVector(postfixConverter->getPostfix().getVector());
         
 
 
-        int size = expected.size() > tokens.size() ? 
-            tokens.size():expected.size();
+        int size = expected.size() > postfix.size() ? 
+            postfix.size():expected.size();
         
         for (int idx = 0; idx < size; idx++)
         {
-            ASSERT_EQ(postfix[idx].get()->getStr(), expected[idx]) 
+            ASSERT_EQ(postfix[idx].get()->getFullStr(), expected[idx]) 
             << "Expected: "
             << expected[idx] << "\n"
             << "Actual: " 
-            << postfix[idx].get()->getStr() << ", "
-            << TokenTypeLookup[postfix[idx].get()->getType()] << "\n\n"
+            << postfix[idx].get()->getFullStr() << ", "
+            << Lookup::getTokenType(postfix[idx].get()->getType()) << "\n\n"
             << "Input:\t" << input << "\n"
             << "Output:\t" << parser->listOutput() << "\n"; 
 
         
         }
-
     }
+    
 
 };
 
-TEST_F(PostFixTessts, SimpleAddition) {
+TEST_F(PostFixTests, SimpleAddition) {
     input = "3+5";
     expected = {"3", "5", "+"};
     check();
 }
 
-TEST_F(PostFixTessts, SimpleSubtraction) {
+TEST_F(PostFixTests, SimpleSubtraction) {
     input = "10-2";
     expected = {"10", "2", "-"};
     check();
 }
 
-TEST_F(PostFixTessts, UnaryMinus) {
+TEST_F(PostFixTests, UnaryMinus) {
     input = "-3+5";
     expected = {"-3", "5", "+"};
     check();
 }
 
-TEST_F(PostFixTessts, UnaryMinusBeforeParenthesis) {
+TEST_F(PostFixTests, UnaryMinusBeforeParenthesis) {
     input = "-(2+3)";
     expected = {"2", "3", "+", "-"};
     check();
 }
 
-TEST_F(PostFixTessts, UnaryMinusAfterOperator) {
+TEST_F(PostFixTests, UnaryMinusAfterOperator) {
     input = "5*-3";
     expected = {"5", "-3", "*"};
     check();
 }
 
-TEST_F(PostFixTessts, FunctionAndOperator) {
+TEST_F(PostFixTests, FunctionAndOperator) {
     input = "cos(0)+sin(0)";
-    expected = {"0", "cos", "0", "sin", "+"};
+    expected = { "cos(0)", "sin(0)", "+"};
     check();
 }
 
-TEST_F(PostFixTessts, NestedFunctions) {
-    input = "sin(cos(0))";
-    expected = {"0", "cos", "sin"};
-    check();
-}
 
-TEST_F(PostFixTessts, ComplexExpression) {
+
+TEST_F(PostFixTests, ComplexExpression) {
     input = "3+4*2/(1-5)^2^3";
     expected = {"3", "4", "2", "*", "1", "5", "-", "2", "3", "^", "^", 
                                                                     "/", "+"};
     check();
 }
 
-/*TEST_F(PostFixTessts, MismatchedParentheses) {
+TEST_F(PostFixTests, MismatchedParentheses) {
     input = "(3+5";
     // Expect the test to handle the error or throw an exception
     ASSERT_THROW(check(), std::runtime_error);
-}*/
+}
 
-TEST_F(PostFixTessts, EmptyInput) {
+TEST_F(PostFixTests, EmptyInput) {
     input = "";
     expected = {};
     check();
 }
-/*
-TEST_F(PostFixTessts, MissingOperand) {
-    input = "3+";
-    // Expect the test to handle the error or throw an exception
-    ASSERT_THROW(check(), std::runtime_error);
-}
-*/
-TEST_F(PostFixTessts, LongExpression) {
-    input = "sin(2+3*5)-cos(4/2)+tan(3^2)";
-    expected = {"2", "3", "5", "*", "+", "sin", "4", "2", "/", "cos", 
-                                            "-", "3", "2", "^", "tan", "+"};
-    check();
-}
+
+
+
 

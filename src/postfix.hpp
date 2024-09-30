@@ -3,6 +3,8 @@
 
 #include "token.hpp"
 #include "token_queue.hpp"
+#include "token_vector.hpp"
+#include "token_stack.hpp"
 
 #include <vector>
 #include <stack>
@@ -14,19 +16,20 @@
 class ShuntingYard
 {
 public:
-    ShuntingYard(std::vector<std::shared_ptr<Token>> input);
+    ShuntingYard(TokenContainer input);
     TokenQueue getPostfix();
 private:
-    std::vector<std::shared_ptr<Token>> input;
-    std::stack<std::shared_ptr<Token>> operators;
+    TokenVector input;
     TokenQueue output;
+    TokenStack operators;
     std::shared_ptr<Token> currentToken;
-    
-    void convert();
+    void convert(TokenVector expression);
     void handleOperator();
-    
+
+
     TokenType currentType();
-void popToOutput();
-    
+    void popToOutput();
+
+
 };
 #endif // __POSTFIX_HPP__

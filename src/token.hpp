@@ -15,14 +15,22 @@
 #include <utility>
 #include <variant>
 
-enum TokenType
+// Forward declarations 
+class TokenVector; 
+class TokenQueue;
+class ExpressionTree;
+
+enum class TokenType
 {
+    NONE,
     NUMBER,
     VARIABLE,
     OPERATOR,
     FUNCTION,
     LEFTPAREN,
-    RIGHTPAREN
+    RIGHTPAREN,
+    UNDERSCORE,
+    STRING
 };
 
 enum class NumberType
@@ -57,10 +65,12 @@ public:
      * @param precedence The precedence of the operator.
      * @param associativity The associativity of the operator.
      */
-    SymbolProperties(int precedence, Associativity associativity);
+    SymbolProperties(int precedence, Associativity associativity, 
+                                                    bool commutative);
 
-    int precedence;                //!< The precedence of the operator
-    Associativity associativity;   //!< Associativity of the operator
+    int precedence;                 //!< The precedence of the operator
+    Associativity associativity;    //!< Associativity of the operator
+    bool commutative;               //!< Commutativity of the operator
 };
 
 /**
@@ -98,6 +108,12 @@ public:
      * @return The string representation of the token.
      */
     std::string getStr() const;
+
+    /**
+     * @brief Returns the complete string representation of the token.
+     * @return The string representation of the token.
+     */
+    virtual std::string getFullStr();
     
     /**
      * @brief Get the Precedence of a token
@@ -113,6 +129,14 @@ public:
      */
     Associativity getAssociativity();
 
+    /**
+     * @brief determines whether operator is commutative
+     * 
+     * @return true if commutative
+     * @return false if not
+     */
+    bool isCommutative();
+
 
     /**
      * @brief sets the isNegative flag to indicate this token represents a 
@@ -126,29 +150,13 @@ public:
      * @return True if the token is negative, otherwise false.
      */
     bool isNegative() const;
+
+    void flipSign();
 };
 
 
 
-static std::unordered_map<std::string,
-    std::pair<TokenType, SymbolProperties>>
-    symbolTable = {
-    {"+", {TokenType::OPERATOR, {1, Associativity::LEFT}}},
-    {"-", {TokenType::OPERATOR, {1, Associativity::LEFT}}},
-    {"*", {TokenType::OPERATOR, {2, Associativity::LEFT}}},
-    {"/", {TokenType::OPERATOR, {2, Associativity::LEFT}}},
-    {"^", {TokenType::OPERATOR, {3, Associativity::RIGHT}}},
-    {"sin", {TokenType::FUNCTION, {4, Associativity::LEFT}}},
-    {"cos", {TokenType::FUNCTION, {4, Associativity::LEFT}}},
-    {"tan", {TokenType::FUNCTION, {4, Associativity::LEFT}}},
-    {"cot", {TokenType::FUNCTION, {4, Associativity::LEFT}}},
-    {"csc", {TokenType::FUNCTION, {4, Associativity::LEFT}}},
-    {"sec", {TokenType::FUNCTION, {4, Associativity::LEFT}}},
-    {"exp", {TokenType::FUNCTION, {4, Associativity::LEFT}}},
-    {"log", {TokenType::FUNCTION, {5, Associativity::LEFT}}},
-    {"(", {TokenType::LEFTPAREN, {5, Associativity::LEFT}}},
-    {")", {TokenType::RIGHTPAREN, {5, Associativity::LEFT}}},
-};
+
 
 /**
  * @brief Represents an operator token.
@@ -166,29 +174,15 @@ public:
     
 };
 
-/**
- * @brief Represents a function token.
- */
-class Function : public Token
-{
-private:
-    SymbolProperties properties; //!< Properties of the function
 
-public:
-    
-    /**
-     * @brief Constructs a Function with a string representation and properties.
-     * @param str The string representation of the function.
-     */
-    Function(const std::string& str);
-    
-};
 
 /**
- * @brief Represents a function token.
+ * @brief Represents a Variable token.
  */
 class Variable : public Token
 {
+private:
+    std::string subscript;
 public:
     /**
      * @brief Constructs a Function with a string representation and properties.
@@ -196,6 +190,9 @@ public:
      * @param properties The properties of the function.
      */
     Variable(const std::string& str);
+    void setSubscript(std::string substr);
+    std::string getSubscript();
+    std::string getFullStr() override;
 };
 
 /**
@@ -236,14 +233,62 @@ public:
     //! Returns the integer value of the number token.
     int getInt() const;
 
-    //! Returns the double value of the number token.
-    double getFloat() const;
-
+    /**
+     * @brief Get the Float object
+     * 
+     * @return double 
+     */
+    double getDouble() const;
+    /**
+     * @brief flips the sign of the number
+     * 
+     */
     void flipSign();
+
+    
 
 
 };
+/**
+ * @brief Represents a function token.
+ */
+class Function : public Token
+{
+private:
+    //!< Properties of the function
+    SymbolProperties properties; 
+    //! Token queue for function input
+    std::shared_ptr<TokenQueue> subExpr;
+    //! expression tree for function input
+    std::shared_ptr<ExpressionTree> subExprTree;
+    //! TokenQueue for exponent
+    std::shared_ptr<TokenQueue> exponent;
+    
+    //! subscript of the function (e.g. log_2)
+    std::shared_ptr<Number> subscript;
+public:
+    
+    /**
+     * @brief Constructs a Function with a string representation and properties.
+     * @param str The string representation of the function.
+     */
+    Function(const std::string& str);
+    void setSubscript(std::shared_ptr<Number> base);
 
+    void setSubExpr(std::shared_ptr<TokenQueue> queue);
+    void setSubExprTree(std::shared_ptr<ExpressionTree> tree);
+
+    void setExponent(std::shared_ptr<TokenQueue> queue);
+    
+    std::shared_ptr<Number> getSubscript();
+    std::shared_ptr<TokenQueue> getExponent();
+    
+    std::shared_ptr<TokenQueue> getSubExpr();
+    std::shared_ptr<ExpressionTree> getSubExprTree();
+    std::string getFullStr() override;
+
+    
+};
 
 /**
  * @brief Represents a left parenthesis

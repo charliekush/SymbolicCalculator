@@ -1,13 +1,11 @@
-#include "token_queue.hpp"
+#include "token_stack.hpp"
 
-
-
-void TokenQueue::push(std::shared_ptr<Token> token)
+void TokenStack::push(std::shared_ptr<Token> token)
 {
-    this->container.emplace_back(token);
+    this->container.emplace(this->container.begin(), token);
 }
 
-std::shared_ptr<Token> TokenQueue::pop()
+std::shared_ptr<Token> TokenStack::pop()
 {
     if (this->size() == 0)
     {
@@ -19,7 +17,7 @@ std::shared_ptr<Token> TokenQueue::pop()
     return out;
 }
 
-std::shared_ptr<Token> TokenQueue::top()
+std::shared_ptr<Token> TokenStack::top()
 {
     if (this->size() == 0)
     {
@@ -27,6 +25,4 @@ std::shared_ptr<Token> TokenQueue::top()
     }
     return this->container.front();
 }
-
-
 
