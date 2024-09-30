@@ -11,11 +11,11 @@
 #include <memory>
 #include <string>
 
-/**
- * @brief Default constructor for ExpressionNode.
- *
- * Initializes the node with no token and no children.
- */
+ /**
+  * @brief Default constructor for ExpressionNode.
+  *
+  * Initializes the node with no token and no children.
+  */
 ExpressionNode::ExpressionNode()
 {
     this->token = nullptr;
@@ -219,9 +219,9 @@ std::shared_ptr<ExpressionNode> ExpressionNode::addChild(
 
 /**
  * @brief swaps the left and right children
- * 
+ *
  */
 void ExpressionNode::swapChildren()
 {
-    std::swap(this->leftChild,this->rightChild);
+    std::swap(this->leftChild, this->rightChild);
 }

@@ -11,30 +11,31 @@
 #include "token.hpp"
 
 #include <memory>
+
 class ExpressionNode : public std::enable_shared_from_this<ExpressionNode>
 {
 public:
     /**
      * @brief Default constructor for ExpressionNode.
-     * 
+     *
      * Initializes the node with no token and no children.
      */
     ExpressionNode();
 
     /**
      * @brief Constructs a node from the given token.
-     * 
+     *
      * @param token The token that the node represents.
      */
     ExpressionNode(std::shared_ptr<Token> token);
 
     /**
      * @brief Adds a child node to this node.
-     * 
-     * @details Attempts to set the provided node as the left child. If the 
-     * left child is already set, it attempts to set the node as the 
+     *
+     * @details Attempts to set the provided node as the left child. If the
+     * left child is already set, it attempts to set the node as the
      * right child.
-     * 
+     *
      * @param node A shared pointer to the node to add as a child.
      * @return A shared pointer to the newly set child.
      * @return nullptr if both left and right children are already set.
@@ -44,7 +45,7 @@ public:
     /**
      * @brief Sets the left child of this node.
      *
-     * @details If the left child is currently null, the provided node is set 
+     * @details If the left child is currently null, the provided node is set
      * as the left child.
      *
      * @param node A shared pointer to the node to set as the left child.
@@ -57,7 +58,7 @@ public:
     /**
      * @brief Sets the right child of this node.
      *
-     * @details If the right child is currently null, the provided node is set 
+     * @details If the right child is currently null, the provided node is set
      * as the right child.
      *
      * @param node A shared pointer to the node to set as the right child.
@@ -69,7 +70,7 @@ public:
 
     /**
      * @brief swaps the left and right children
-     * 
+     *
      */
     void swapChildren();
 
@@ -91,21 +92,21 @@ public:
      * @return A shared pointer to the removed left child node.
      */
     std::shared_ptr<ExpressionNode> removeLeftChild();
-    
+
     /**
      * @brief Removes the right child of this node.
      *
      * @return A shared pointer to the removed right child node.
      */
     std::shared_ptr<ExpressionNode> removeRightChild();
-    
+
     /**
      * @brief Gets the parent of the node.
-     * 
+     *
      * @return A weak pointer to the parent node.
      */
     std::weak_ptr<ExpressionNode> getParent();
-    
+
     /**
      * @brief Gets the right child of the node.
      *
