@@ -1,5 +1,7 @@
 #include "postfix.hpp"
 
+#include <stdexcept>
+
 
 ShuntingYard::ShuntingYard(TokenContainer input)
 {
@@ -48,15 +50,15 @@ void ShuntingYard::convert(TokenVector expression)
             {
                 if (operators.size() == 0)
                 {
-                    std::runtime_error("Mismatched parentheses");
-                    exit(1);
+                    throw std::runtime_error("Mismatched parentheses");
+                    
                 }
                 this->popToOutput();
             }
             if (operators.size() == 0)
             {
-                std::runtime_error("Mismatched parentheses");
-                exit(1);
+                throw std::runtime_error("Mismatched parentheses");
+                
             }
             operators.pop();
             if (operators.size() > 0 &&
@@ -70,8 +72,8 @@ void ShuntingYard::convert(TokenVector expression)
     {
         if (operators.top()->getType() == TokenType::LEFTPAREN)
         {
-            std::runtime_error("Mismatched parentheses");
-            exit(1);
+            throw std::runtime_error("Mismatched parentheses");
+            
         }
         this->popToOutput();
     }
