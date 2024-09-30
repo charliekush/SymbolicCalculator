@@ -15,8 +15,8 @@ std::shared_ptr<Token>& TokenVector::operator[](int index)
         std::string msg = "Vector index out of bounds!\n\tIndex: " +
             std::to_string(index) + "\n\tSize: " + std::to_string(this->size()) 
             + "\n\tVector: [" + this->toString() + "]";
-        std::runtime_error(msg.c_str());
-        exit(1);
+        throw std::runtime_error(msg.c_str());
+        
 
 
 
@@ -36,8 +36,8 @@ void TokenVector::erase(int start, int end)
         std::to_string(start) + "-" + std::to_string(end) +
         "\n\tSize: " + std::to_string(this->size()) +
         "\n\tVector: [" + this->toString() + "]";
-        std::runtime_error(msg.c_str());
-        exit(1);
+        throw std::runtime_error(msg.c_str());
+        
     }
     this->container.erase(this->container.begin() + start, 
                                 this->container.begin() + end);
@@ -55,8 +55,8 @@ void TokenVector::erase(int idx)
         std::to_string(idx) +
         "\n\tSize: " + std::to_string(this->size()) +
         "\n\tVector: [" + this->toString() + "]";
-        std::runtime_error(msg.c_str());
-        exit(1);
+        throw std::runtime_error(msg.c_str());
+        
     }
     this->container.erase(this->container.begin() + idx);
 }
@@ -70,8 +70,8 @@ void TokenVector::emplace(int idx, std::shared_ptr<Token> token)
         std::to_string(idx) +
         "\n\tSize: " + std::to_string(this->size()) +
         "\n\tVector: [" + this->toString() + "]";
-        std::runtime_error(msg.c_str());
-        exit(1);
+        throw std::runtime_error(msg.c_str());
+        
     }
     this->container.emplace(this->container.begin() + idx, token);
     
