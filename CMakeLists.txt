@@ -20,6 +20,7 @@ set(PROJECT_SOURCE_FILES
     src/token_stack.cpp
     src/expression_node.cpp
     src/expression_tree.cpp
+    src/derivative.cpp
 )
 
 # Create a static library for the common source files
