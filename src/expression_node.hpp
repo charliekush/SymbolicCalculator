@@ -120,7 +120,13 @@ public:
      * @return A shared pointer to the left child node.
      */
     std::shared_ptr<ExpressionNode> getLeft();
-
+    
+    /**
+     * @brief Set the Token object
+     * 
+     * @param token the token to change to.
+     */
+    void setToken(std::shared_ptr<Token> token);
     /**
      * @brief Gets the token represented by this node.
      *
@@ -147,12 +153,56 @@ public:
      * @return A string representing the token.
      */
     std::string getStr();
+    
+    /**
+     * @brief checks if subtree of node contains a given variable
+     * 
+     * @param var the variable to be found
+     * @return true if the variable is found
+     * @return false otherwise
+     */
+    bool hasVariable(const std::shared_ptr<Variable> var);
+
+    /**
+     * @brief Sets the derivative of this node.
+     *
+     * @param node A shared pointer to the node to set as the derivative root.
+     * @return A shared pointer to the newly set derivative root.
+     */
+    std::shared_ptr<ExpressionNode> setDerivative(
+                            std::shared_ptr<ExpressionNode> node);
+    /**
+     * @brief Sets the derivative of this node when it is a single token.
+     *
+     * @param node A shared pointer to the token to set as the derivative root.
+     * @return A shared pointer to the newly set derivative root.
+     */
+    std::shared_ptr<ExpressionNode> setDerivative(
+                            std::shared_ptr<Token> token);                      
+    /**
+     * @brief Gets the derivative root of the node.
+     *
+     * @return A shared pointer to the derivative root of the node.
+     * @return nullptr if it does not exist
+     */
+    std::shared_ptr<ExpressionNode> getDerivative();
+    
+    /**
+     * @brief checks if the node is a leaf node
+     * 
+     * @return true if the node has no children
+     * @return false otherwise
+     */
+    bool isLeaf();
+    void replaceWithRightChild();
+    void replaceWithLeftChild();
 
 protected:
     std::shared_ptr<Token> token;
     std::weak_ptr<ExpressionNode> parent;
     std::shared_ptr<ExpressionNode> leftChild;
     std::shared_ptr<ExpressionNode> rightChild;
-
-};
+    std::shared_ptr<ExpressionNode> derivative;
+    
+}; 
 #endif // __EXPRESSION_NODE_HPP__

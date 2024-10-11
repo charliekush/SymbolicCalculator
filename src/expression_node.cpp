@@ -21,6 +21,7 @@ ExpressionNode::ExpressionNode()
     this->token = nullptr;
     this->leftChild = nullptr;
     this->rightChild = nullptr;
+    this->derivative = nullptr;
 }
 
 /**
@@ -73,6 +74,15 @@ std::shared_ptr<ExpressionNode> ExpressionNode::getLeft()
     return this->leftChild;
 }
 
+/**
+ * @brief Set the Token object
+ *
+ * @param token the token to change to.
+ */
+void ExpressionNode::setToken(std::shared_ptr<Token> token)
+{
+    this->token = token;
+}
 /**
  * @brief Gets the token represented by this node.
  *
@@ -224,4 +234,136 @@ std::shared_ptr<ExpressionNode> ExpressionNode::addChild(
 void ExpressionNode::swapChildren()
 {
     std::swap(this->leftChild, this->rightChild);
+}
+
+/**
+     * @brief checks if subtree of node contains a given variable
+     *
+     * @param var the variable to be found
+     * @return true if the variable is found
+     * @return false otherwise
+     */
+bool ExpressionNode::hasVariable(const std::shared_ptr<Variable> var)
+{
+    if (this->getType() == TokenType::VARIABLE)
+    {
+        if (var->equals(this->getToken()))
+        {
+            return true;
+        }
+    }
+    if (this->getLeft())
+    {
+        if (this->getLeft()->hasVariable(var))
+        {
+            return true;
+        }
+    }
+    if (this->getRight())
+    {
+        if (this->getRight()->hasVariable(var))
+        {
+            return true;
+        }
+    }
+    return false;
+}
+
+/**
+ * @brief Sets the derivative of this node.
+ *
+ * @param node A shared pointer to the node to set as the derivative root.
+ * @return A shared pointer to the newly set derivative root.
+ */
+std::shared_ptr<ExpressionNode> ExpressionNode::setDerivative(
+                            std::shared_ptr<ExpressionNode> node)
+{
+    this->derivative = node;
+    return this->derivative;
+}
+
+/**
+ * @brief Gets the derivative root of the node.
+ *
+ * @return A shared pointer to the derivative root of the node.
+ * @return nullptr if it does not exist
+ */
+std::shared_ptr<ExpressionNode> ExpressionNode::getDerivative()
+{
+    return this->getDerivative();
+}
+
+/**
+     * @brief checks if the node is a leaf node
+     *
+     * @return true if the node has no children
+     * @return false otherwise
+     */
+bool ExpressionNode::isLeaf()
+{
+    return (!this->getLeft() && !this->getRight());
+}
+
+void ExpressionNode::replaceWithLeftChild() {
+    // Get the left child
+    std::shared_ptr<ExpressionNode> left = this->getLeft();
+
+    // If there is no left child, just return
+    if (!left)
+    {
+        return;
+    }
+
+    // Set the left child's parent to this node's parent
+    if (auto parentPtr = parent.lock())
+    {
+        if (parentPtr->getLeft() == shared_from_this())
+        {
+            parentPtr->setLeft(left);
+        }
+        else if (parentPtr->getRight() == shared_from_this())
+        {
+            parentPtr->setRight(left);
+        }
+    }
+    // Update left child's parent to the current parent
+    left->setParent(parent);
+
+    // Remove and delete the right child
+    removeRightChild();
+
+    // Clear this node's parent
+    removeParent();
+}
+
+void ExpressionNode::replaceWithRightChild() {
+    // Get the right child
+    std::shared_ptr<ExpressionNode> right = this->getRight();
+
+    // If there is no right child, just return
+    if (!right)
+    {
+        return;
+    }
+
+    // Set the right child's parent to this node's parent
+    if (auto parentPtr = parent.lock())
+    {
+        if (parentPtr->getLeft() == shared_from_this())
+        {
+            parentPtr->setLeft(right);
+        }
+        else if (parentPtr->getRight() == shared_from_this())
+        {
+            parentPtr->setRight(right);
+        }
+    }
+    // Update right child's parent to the current parent
+    right->setParent(parent); 
+
+    // Remove and delete the left child
+    removeLeftChild();
+
+    // Clear this node's parent
+    removeParent();
 }
