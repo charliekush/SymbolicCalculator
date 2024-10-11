@@ -21,6 +21,7 @@ set(PROJECT_SOURCE_FILES
     src/expression_node.cpp
     src/expression_tree.cpp
     src/derivative.cpp
+    src/calculator.cpp
 )
 
 # Create a static library for the common source files
