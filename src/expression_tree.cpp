@@ -5,6 +5,10 @@ ExpressionTree::ExpressionTree(TokenQueue queue)
 {
     this->root = this->buildTree(queue);
 }
+ExpressionTree::ExpressionTree(std::shared_ptr<ExpressionNode> root)
+{
+    this->root = root;
+}
 
 std::shared_ptr<ExpressionNode> ExpressionTree::buildTree(TokenQueue queue)
 {
@@ -24,7 +28,7 @@ std::shared_ptr<ExpressionNode> ExpressionTree::buildTree(TokenQueue queue)
                 std::make_shared<ExpressionNode>(currentToken);
             nodeStack.push(newNode);
         }
-        // If the token is an operator, pop two operands and create a new subtree
+        // If the token is an operator, pop two operands and make a new subtree
         else if (currentToken->getType() == TokenType::OPERATOR)
         {
             std::shared_ptr<ExpressionNode> newNode =
@@ -70,7 +74,12 @@ std::shared_ptr<ExpressionNode> ExpressionTree::buildTree(TokenQueue queue)
 }
 
 
-
+/**
+ * @brief gets all the leaves in the expression tree
+ *
+ * @param root the node to start from
+ * @return shared pointers to the leaves of the tree
+ */
 std::vector<std::shared_ptr<ExpressionNode>>
 ExpressionTree::getLeaves(std::shared_ptr<ExpressionNode> root)
 {

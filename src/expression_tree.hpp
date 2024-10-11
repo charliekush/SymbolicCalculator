@@ -11,7 +11,9 @@
 class ExpressionTree
 {
 public:
+    ExpressionTree() = default;
     ExpressionTree(TokenQueue queue);
+    ExpressionTree(std::shared_ptr<ExpressionNode> root);
     std::shared_ptr<ExpressionNode> root;
 private:
     std::shared_ptr<ExpressionNode> buildTree(TokenQueue queue);
@@ -20,6 +22,7 @@ private:
         getLeaves(std::shared_ptr<ExpressionNode> root);
     void getLeavesHelper(std::shared_ptr<ExpressionNode> node,
                 std::vector<std::shared_ptr<ExpressionNode>>& leaves);
+    
 };
 
 #endif //__EXPRESSION_TREE_HPP__
