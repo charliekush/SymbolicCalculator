@@ -313,3 +313,45 @@ std::string Variable::getFullStr()
     }
     return out;
 }
+
+
+bool Variable::equals(std::shared_ptr<Token> other)
+{
+    if (other->getType() != TokenType::VARIABLE)
+    {
+        return false;
+    }
+    auto otherVar = std::dynamic_pointer_cast<Variable>(other);
+    bool same = (this->getStr() == otherVar->getStr());
+    if (same)
+    {
+        same = (this->getSubscript() == otherVar->getSubscript());
+    }
+    return same;
+}
+
+bool Number::equals(int other)
+{
+    
+    if (this->isInt())
+    {
+        return other == this->getInt();
+    }
+    else
+    {
+        return (other * 1.0) == this->getDouble();
+    }
+}
+
+bool Number::equals(double other)
+{
+    
+    if (!this->isInt())
+    {
+        return other == this->getDouble();
+    }
+    else
+    {
+        return other == this->getInt() * 1.0;
+    }
+}

@@ -194,6 +194,7 @@ public:
     void setSubscript(std::string substr);
     std::string getSubscript();
     std::string getFullStr() override;
+    bool equals(std::shared_ptr<Token> other);
 };
 
 /**
@@ -245,6 +246,9 @@ public:
      * 
      */
     void flipSign();
+
+    bool equals(int other);
+    bool equals(double other);
 
     
 
