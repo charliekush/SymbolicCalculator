@@ -177,7 +177,7 @@ void Derivative::solveChildren(nodePtr node)
 std::shared_ptr<ExpressionNode> Derivative::powerRule(nodePtr node)
 {
     this->checkChildren(node);
-    this->solveChildren(node);  // Solve for the derivatives of the children first
+    this->solveChildren(node);  
 
     nodePtr base = node->getLeft();
     nodePtr exponent = node->getRight();
@@ -199,7 +199,7 @@ std::shared_ptr<ExpressionNode> Derivative::powerRule(nodePtr node)
     // Case 2: Base is constant, exponent contains variable
     else if (!baseContainsVar && exponentContainsVar)
     {
-        // Apply the chain rule: d/dx [a^f(x)] = a^f(x) * ln(a) * f'(x)
+        // Chain rule: d/dx [a^f(x)] = a^f(x) * ln(a) * f'(x)
 
         auto lnFunc = std::make_shared<Function>("ln");
         lnFunc->setSubExprTree(base);
@@ -212,7 +212,7 @@ std::shared_ptr<ExpressionNode> Derivative::powerRule(nodePtr node)
     // Case 3: Both base and exponent contain the variable
     else if (baseContainsVar && exponentContainsVar)
     {
-        // Apply the generalized power rule: d/dx [f(x)^g(x)]
+        // Generalized power rule: d/dx [f(x)^g(x)]
         // = f(x)^g(x) * [g'(x) * ln(f(x)) + f'(x) * g(x) / f(x)]
         auto lnFunc = std::make_shared<Function>("ln");
         lnFunc->setSubExprTree(base);
