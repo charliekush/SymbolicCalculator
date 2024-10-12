@@ -20,6 +20,7 @@
 class TokenVector; 
 class TokenQueue;
 class ExpressionTree;
+class ExpressionNode;
 
 enum class TokenType
 {

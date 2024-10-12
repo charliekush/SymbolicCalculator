@@ -7,5 +7,5 @@ Symbolic derivative calculator
   - [x] Generalized power rule function
   - [ ] Chain rule function
   - [x] Product rule function
-  - [ ] Qoutient rule function
+  - [x] Qoutient rule function
 - [ ] Update all docstrings

@@ -267,3 +267,26 @@ std::shared_ptr<ExpressionNode> Derivative::productRule(nodePtr node)
     }
     return node->getDerivative();
 }
+
+
+std::shared_ptr<ExpressionNode> Derivative::quotientRule(nodePtr node)
+{
+    this->checkChildren(node);
+    this->solveChildren(node);
+
+    // Starting with d/dx [u/v]
+    nodePtr u = node->getLeft();
+    nodePtr v = node->getRight();
+
+    bool uContainsVar = u->hasVariable(this->diffVar);
+    bool vContainsVar = v->hasVariable(this->diffVar);
+    // v * u' - u * v'
+    nodePtr numerator = subtract(times(v, u->getDerivative()), 
+                                     times(u, v->getDerivative()));
+    nodePtr denominator = power(v, 
+    std::make_shared<ExpressionNode>(std::make_shared<Number>("2", 2))); // v^2
+
+    // d/dx [u/v] = (v * u' - u * v') / (v^2)
+    node->setDerivative(divide(numerator, denominator));
+    return node->getDerivative();
+}
