@@ -6,6 +6,6 @@ Symbolic derivative calculator
   - [ ] Implement automatic dfifferentiation
   - [x] Generalized power rule function
   - [ ] Chain rule function
-  - [ ] Product rule function
+  - [x] Product rule function
   - [ ] Qoutient rule function
 - [ ] Update all docstrings

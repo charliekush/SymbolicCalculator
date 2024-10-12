@@ -231,3 +231,39 @@ std::shared_ptr<ExpressionNode> Derivative::powerRule(nodePtr node)
     }
     return node->getDerivative();
 }
+
+void Derivative::solveChildren(nodePtr node)
+{
+    
+    solve(node->getLeft());
+    solve(node->getRight()); 
+}
+
+
+std::shared_ptr<ExpressionNode> Derivative::productRule(nodePtr node)
+{
+    this->checkChildren(node);
+    this->solveChildren(node);
+
+    // Starting with d/dx u*v
+    nodePtr u = node->getLeft();
+    nodePtr v = node->getRight();
+
+    bool uContainsVar = u->hasVariable(this->diffVar);
+    bool vContainsVar = v->hasVariable(this->diffVar);
+    
+    if (uContainsVar && vContainsVar)
+    {
+        node->setDerivative(add(times(u,v->getDerivative()),
+                                times(u->getDerivative(),v)));
+    }
+    else if (uContainsVar)
+    {
+        node->setDerivative(times(u->getDerivative(), v));
+    }
+    else if (vContainsVar)
+    {
+        node->setDerivative(times(u, v->getDerivative()));
+    }
+    return node->getDerivative();
+}
