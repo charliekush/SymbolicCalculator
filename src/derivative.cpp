@@ -34,12 +34,12 @@ Derivative::Derivative(std::string input, std::string wrt)
 
     ShuntingYard converter(parser.tokenize());
     this->tree = ExpressionTree(converter.getPostfix());
-
 }
 
 
 void Derivative::solve()
 {
+    this->simplify(this->tree.root);
     this->solve(this->tree.root);
 }
 
@@ -57,6 +57,91 @@ std::shared_ptr<ExpressionNode> Derivative::solve(
     return 0;
 }
 
+std::shared_ptr<ExpressionNode> Derivative::simplify(nodePtr node)
+{
+    if (node->getType()  == TokenType::OPERATOR)
+    {
+        this->simplify(node->getLeft());
+        this->simplify(node->getRight());
+        if (node->getStr() == "^")
+        {
+            Arithmetic::simplifyExponent(node);
+        }
+        else if (node->getStr() == "*")
+        {
+            Arithmetic::simplifyMultiplication(node);
+        }
+        else if (node->getStr() == "/")
+        {
+            Arithmetic::simplifyDivision(node);
+        }
+        else if (node->getStr() == "+")
+        {
+            Arithmetic::simplifyAddition(node);
+        }
+        else if (node->getStr() == "-")
+        {
+            Arithmetic::simplifySubtraction(node);
+        }
+    }
+    if (node->getType()  == TokenType::FUNCTION)
+    {
+        auto func = std::dynamic_pointer_cast<Function>(node->getToken());
+        nodePtr newRoot = this->simplify(func->getSubExprTree()->root);
+        auto funcTree = std::make_shared<ExpressionTree>(newRoot);
+        func->setSubExprTree(funcTree);
+    }
+    return node;
+}
+
+
+std::shared_ptr<ExpressionNode> Derivative::times(nodePtr left, nodePtr right)
+{
+    auto opToken = std::make_shared<Operator>("*");
+    auto node = std::make_shared<ExpressionNode>(opToken);
+    node->setLeft(left);
+    node->setRight(right);
+    this->checkChildren(node);
+    return node;
+}
+std::shared_ptr<ExpressionNode> Derivative::divide(nodePtr left, nodePtr right)
+{
+    auto opToken = std::make_shared<Operator>("/");
+    auto node = std::make_shared<ExpressionNode>(opToken);
+    node->setLeft(left);
+    node->setRight(right);
+    this->checkChildren(node);
+    return node;
+}
+std::shared_ptr<ExpressionNode> Derivative::add(nodePtr left, nodePtr right)
+{
+    auto opToken = std::make_shared<Operator>("+");
+    auto node = std::make_shared<ExpressionNode>(opToken);
+    node->setLeft(left);
+    node->setRight(right);
+    this->checkChildren(node);
+    return node;
+}
+std::shared_ptr<ExpressionNode> Derivative::subtract(nodePtr left, 
+                                                            nodePtr right)
+{
+    auto opToken = std::make_shared<Operator>("-");
+    auto node = std::make_shared<ExpressionNode>(opToken);
+    node->setLeft(left);
+    node->setRight(right);
+    this->checkChildren(node);
+    return node;
+}
+std::shared_ptr<ExpressionNode> Derivative::power(nodePtr left, 
+                                                            nodePtr right)
+{
+    auto opToken = std::make_shared<Operator>("^");
+    auto node = std::make_shared<ExpressionNode>(opToken);
+    node->setLeft(left);
+    node->setRight(right);
+    this->checkChildren(node);
+    return node;
+}
 void Derivative::checkChildren(nodePtr node)
 {
     if (!node->getLeft())
@@ -83,4 +168,66 @@ void Derivative::checkChildren(nodePtr node)
 }
 
 
+void Derivative::solveChildren(nodePtr node)
+{
+    
+    solve(node->getLeft());
+    solve(node->getRight()); 
+}
+std::shared_ptr<ExpressionNode> Derivative::powerRule(nodePtr node)
+{
+    this->checkChildren(node);
+    this->solveChildren(node);  // Solve for the derivatives of the children first
 
+    nodePtr base = node->getLeft();
+    nodePtr exponent = node->getRight();
+
+    bool baseContainsVar = base->hasVariable(this->diffVar);
+    bool exponentContainsVar = exponent->hasVariable(this->diffVar);
+
+    // Case 1: Base contains variable, exponent is constant
+    if (baseContainsVar && !exponentContainsVar)
+    {
+        // Apply the basic power rule: d/dx [f(x)^a] = a * f(x)^(a-1) * f'(x)
+        nodePtr one = std::make_shared<ExpressionNode>(
+                    std::make_shared<Number>("1", 1)); \
+        nodePtr exponentMinusOne = subtract(exponent, one);
+
+        
+        node->setDerivative(times(exponent, power(base, exponentMinusOne)));
+    }
+    // Case 2: Base is constant, exponent contains variable
+    else if (!baseContainsVar && exponentContainsVar)
+    {
+        // Apply the chain rule: d/dx [a^f(x)] = a^f(x) * ln(a) * f'(x)
+
+        auto lnFunc = std::make_shared<Function>("ln");
+        lnFunc->setSubExprTree(base);
+        auto lnBase = std::make_shared<ExpressionNode>(lnFunc);  
+
+        // Set the derivative using chain rule
+        node->setDerivative(times(power(base, exponent), 
+                        times(lnBase, exponent->getDerivative())));
+    }
+    // Case 3: Both base and exponent contain the variable
+    else if (baseContainsVar && exponentContainsVar)
+    {
+        // Apply the generalized power rule: d/dx [f(x)^g(x)]
+        // = f(x)^g(x) * [g'(x) * ln(f(x)) + f'(x) * g(x) / f(x)]
+        auto lnFunc = std::make_shared<Function>("ln");
+        lnFunc->setSubExprTree(base);
+        auto lnBase = std::make_shared<ExpressionNode>(lnFunc);
+
+         // f'(x) * g(x) / f(x)
+        nodePtr baseDerivativeTerm = divide(times(base->getDerivative(), 
+                                    exponent), base); 
+        // g'(x) * ln(f(x))
+        nodePtr exponentDerivativeTerm = times(exponent->getDerivative(), 
+                                                                    lnBase);  
+
+        nodePtr totalDerivative = add(baseDerivativeTerm, 
+                                        exponentDerivativeTerm);
+        node->setDerivative(times(power(base, exponent), totalDerivative));
+    }
+    return node->getDerivative();
+}

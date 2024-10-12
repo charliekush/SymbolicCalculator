@@ -282,7 +282,7 @@ public:
 
     void setSubExpr(std::shared_ptr<TokenQueue> queue);
     void setSubExprTree(std::shared_ptr<ExpressionTree> tree);
-
+    void setSubExprTree(std::shared_ptr<ExpressionNode> root);
     void setExponent(std::shared_ptr<TokenQueue> queue);
     
     std::shared_ptr<Number> getSubscript();
