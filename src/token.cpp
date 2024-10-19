@@ -144,11 +144,23 @@ Function::Function(const std::string& str) :
     this->subExprTree = nullptr;
     this->exponent = nullptr;
     this->subscript = nullptr;
+    if (Lookup::symbolTable.find(str) != Lookup::symbolTable.end())
+    {
+        this->properties =  Lookup::symbolTable[str].second;
+    }
+    else
+    {
+        throw std::runtime_error("Function not found!");
+    }
+    
 }
 
 void Function::setSubscript(std::shared_ptr<Number> base)
 {
-    this->subscript = base;
+    if (this->str != "log")
+    {
+        throw std::runtime_error( "Only log function can use subscripts");
+    } 
 }
 void Function::setExponent(std::shared_ptr<TokenQueue> exponent)
 {
@@ -168,7 +180,7 @@ void Function::setSubExpr(std::shared_ptr<TokenQueue> queue)
     this->subExpr = queue;
 }
 
-void Function::setSubExprTree(std::shared_ptr<ExpressionTree> tree)
+void Function::setSubExprTree(std::shared_ptr<ExpressionNode> tree)
 {
     this->subExprTree = tree;
 }
@@ -182,7 +194,7 @@ std::shared_ptr<TokenQueue> Function::getSubExpr()
 {
     return this->subExpr;
 }
-std::shared_ptr<ExpressionTree> Function::getSubExprTree()
+std::shared_ptr<ExpressionNode> Function::getSubExprTree()
 {
     return this->subExprTree;
 }
@@ -215,7 +227,12 @@ std::string Function::getFullStr()
  * @param value The numeric value (double).
  */
 Number::Number(const std::string& str, double value) :
-    Token(TokenType::NUMBER, str), value(value), type(NumberType::DOUBLE) {
+    Token(TokenType::NUMBER, str), value(value), type(NumberType::DOUBLE) 
+{
+    if (value < 0)
+    {
+        this->flipSign();
+    }
 }
 
 /**
@@ -252,7 +269,12 @@ bool Number::isDouble() const
  */
 int Number::getInt() const
 {
-    return std::get<int>(value);
+    int out = std::get<int>(value);
+    if (this->isNegative())
+    {
+        out *= -1;
+    }
+    return out;
 }
 
 /**
@@ -262,7 +284,12 @@ int Number::getInt() const
  */
 double Number::getDouble() const
 {
-    return std::get<double>(value);
+    double out = std::get<double>(value);
+    if (this->isNegative())
+    {
+        out *= -1.0;
+    }
+    return out;
 }
 
 void Number::flipSign() {
