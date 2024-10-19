@@ -9,19 +9,22 @@ include_directories(src/ tests/)
 
 # Define the project source files once
 set(PROJECT_SOURCE_FILES 
-    src/lookup.cpp
-    src/tokenizer.cpp
-    src/token.cpp
     src/MWT.cpp
-    src/postfix.cpp
-    src/token_container.cpp
-    src/token_queue.cpp
-    src/token_vector.cpp
-    src/token_stack.cpp
-    src/expression_node.cpp
+    src/derivative.cpp      
     src/expression_tree.cpp
-    src/derivative.cpp
-    src/calculator.cpp
+    src/lookup.cpp
+    src/postfix.cpp
+    src/token_container.cpp 
+    src/token_stack.cpp     
+    src/tokenizer.cpp
+    src/calculator.cpp      
+    src/expression_node.cpp 
+    src/function_defs.cpp   
+    src/main.cpp
+    src/token.cpp
+    src/token_queue.cpp     
+    src/token_vector.cpp
+    src/latex_converter.cpp
 )
 
 # Create a static library for the common source files
