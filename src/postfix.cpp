@@ -27,6 +27,10 @@ void ShuntingYard::convert(TokenVector expression)
         {
             output.push(this->currentToken);
         }
+        else if (this->currentType() == TokenType::VARIABLE)
+        {
+            output.push(this->currentToken);
+        }
         else if (this->currentType() == TokenType::FUNCTION)
         {
             auto func = std::dynamic_pointer_cast<Function>(this->currentToken);
