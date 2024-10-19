@@ -14,8 +14,8 @@ std::unordered_map<std::string, std::pair<TokenType, SymbolProperties>>
     {"csc", {TokenType::FUNCTION, {4, Associativity::NONE, false}}},
     {"sec", {TokenType::FUNCTION, {4, Associativity::NONE, false}}},
     {"exp", {TokenType::FUNCTION, {4, Associativity::NONE, false}}},
+    {"ln", {TokenType::FUNCTION, {5, Associativity::NONE, false}}},
     {"log", {TokenType::FUNCTION, {5, Associativity::NONE, false}}},
-    {"sqrt", {TokenType::FUNCTION, {5, Associativity::NONE, false}}},
     {"sqrt", {TokenType::FUNCTION, {5, Associativity::NONE, false}}},
     {"(", {TokenType::LEFTPAREN, {5, Associativity::NONE, false}}},
     {")", {TokenType::RIGHTPAREN, {5, Associativity::NONE, false}}},
@@ -104,4 +104,17 @@ std::string Lookup::getTokenType(TokenType type)
         case TokenType::STRING:     return "STRING";
         default:                    return "UNKNOWN";
     }
+};
+
+std::unordered_map<std::string, std::shared_ptr<FunctionDefinition>> 
+    Lookup::functionLookup = {
+    {"sin", std::make_shared<Sin>()},
+    {"cos", std::make_shared<Cos>()},
+    {"tan", std::make_shared<Tan>()},
+    {"cot", std::make_shared<Cot>()},
+    {"csc", std::make_shared<Csc>()},
+    {"sec", std::make_shared<Sec>()},
+    {"exp", std::make_shared<Exp>()},
+    {"ln", std::make_shared<Ln>()},
+    {"sqrt", std::make_shared<Sqrt>()},
 };
