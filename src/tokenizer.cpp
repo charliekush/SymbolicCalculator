@@ -82,10 +82,7 @@ TokenVector Tokenizer::tokenize()
         if (this->currentToken()->getType() == TokenType::FUNCTION)
         {
             this->handleFunction();
-        }
         
-        if (this->currentToken()->getType() == TokenType::FUNCTION)
-        {
             std::shared_ptr<Function> func =
                 std::dynamic_pointer_cast<Function>(this->currentToken());
             std::shared_ptr<TokenQueue> exponent = func->getExponent();
@@ -251,7 +248,7 @@ Number Tokenizer::parseNumber()
             }
             else
             {
-                std::runtime_error("Multiple decimal points in number");
+                throw std::runtime_error("Multiple decimal points in number");
             }
         }
         this->getNext();
@@ -412,12 +409,12 @@ void Tokenizer::handleFunction()
                     std::string errorMsg =
                         "Only log function can have subscript, not \"" +
                         func->getStr() + "\"!";
-                    std::runtime_error(errorMsg.c_str());
+                    throw std::runtime_error(errorMsg.c_str());
                 }
                 int underscoreIdx = this->tokensIdx++;
                 if (this->tokensIdx == this->output.size())
                 {
-                    std::runtime_error("No subscript found!");
+                    throw std::runtime_error("No subscript found!");
                     return;
                 }
                 subScript = this->getSubTokens();
@@ -430,7 +427,7 @@ void Tokenizer::handleFunction()
                 }
                 else
                 {
-                    std::runtime_error(
+                    throw std::runtime_error(
                         "Bad subscript! logarithm must have numeric base");
                 }
 
@@ -446,7 +443,7 @@ void Tokenizer::handleFunction()
                 exponent = this->getSubTokens();
                 if (exponent->size() == 0)
                 {
-                    std::runtime_error("No exponent found!");
+                    throw std::runtime_error("No exponent found!");
                 }
                 func->setExponent(exponent);
                 this->output.erase(exponentIdx, this->tokensIdx + 1);
@@ -489,8 +486,11 @@ std::shared_ptr<TokenQueue> Tokenizer::getSubTokens()
         std::shared_ptr<Token>& token = this->output[this->tokensIdx];
 
         // Push current token to the subexpression
+        if (token->getType() == TokenType::FUNCTION)
+        {
+            this->handleFunction();
+        }
         subExpr->push(token);
-
         // Check for left parenthesis and increment the count
         if (token->getType() == TokenType::LEFTPAREN)
         {
