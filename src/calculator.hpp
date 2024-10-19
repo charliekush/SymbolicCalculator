@@ -34,4 +34,25 @@ public:
     
 };
 
+
+class Operation
+{
+    typedef std::shared_ptr<ExpressionNode> nodePtr;
+    
+public:
+    static nodePtr times(nodePtr left, nodePtr right);
+    static nodePtr divide(nodePtr left, nodePtr right);
+    static nodePtr add(nodePtr left, nodePtr right);
+    static nodePtr subtract(nodePtr left, nodePtr right);
+    static nodePtr power(nodePtr left, nodePtr right);
+};
+
+class TreeFixer
+{   
+    typedef std::shared_ptr<ExpressionNode> nodePtr;
+public:
+    static void checkTree(nodePtr node);
+    static nodePtr expandNegative(nodePtr node);
+    static void checkChildren(nodePtr node);
+};
 #endif // __CALCULATOR_HPP__
