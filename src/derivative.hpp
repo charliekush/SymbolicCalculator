@@ -1,7 +1,7 @@
 #ifndef __DERIVATIVE_HPP__
 #define __DERIVATIVE_HPP__
 
-#include "expression_tree.hpp"
+
 #include "expression_node.hpp"
 
 #include <memory>
@@ -9,7 +9,7 @@ class Derivative
 {
     typedef std::shared_ptr<ExpressionNode> nodePtr;
 private:
-    ExpressionTree tree;
+    nodePtr root;
     std::shared_ptr<Variable> diffVar;
 public:
     Derivative(std::string input, std::string wrt);
@@ -18,7 +18,7 @@ public:
      * @brief calculates the derivative of the entire tree
      * 
      */
-    void solve();
+    nodePtr solve();
 
     /**
      * @brief calculates the derivative from a node
@@ -37,11 +37,7 @@ public:
     nodePtr chainRule(nodePtr root);
     nodePtr simplify(nodePtr node);
 
-    nodePtr times(nodePtr left, nodePtr right);
-    nodePtr divide(nodePtr left, nodePtr right);
-    nodePtr add(nodePtr left, nodePtr right);
-    nodePtr subtract(nodePtr left, nodePtr right);
-    nodePtr power(nodePtr left, nodePtr right);
+    
 
 
     void checkChildren(nodePtr node);
