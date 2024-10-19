@@ -7,6 +7,7 @@
  */
 #include "expression_node.hpp"
 #include "token.hpp"
+#include "token_queue.hpp"
 
 #include <memory>
 #include <string>
@@ -35,6 +36,7 @@ ExpressionNode::ExpressionNode(std::shared_ptr<Token> token)
     this->leftChild = nullptr;
     this->rightChild = nullptr;
 }
+
 
 /**
  * @brief Gets the parent of the node.
@@ -266,6 +268,14 @@ bool ExpressionNode::hasVariable(const std::shared_ptr<Variable> var)
             return true;
         }
     }
+    if (this->getType() == TokenType::FUNCTION)
+    {
+        auto func = std::dynamic_pointer_cast<Function>(this->getToken());
+        if (func->getSubExprTree()->hasVariable(var))
+        {
+            return true;
+        }
+    }
     return false;
 }
 
@@ -290,7 +300,11 @@ std::shared_ptr<ExpressionNode> ExpressionNode::setDerivative(
  */
 std::shared_ptr<ExpressionNode> ExpressionNode::getDerivative()
 {
-    return this->getDerivative();
+    if(this->derivative)
+    {
+        return this->derivative;
+    }
+    return nullptr;
 }
 
 /**
@@ -366,4 +380,112 @@ void ExpressionNode::replaceWithRightChild() {
 
     // Clear this node's parent
     removeParent();
+}
+
+
+
+
+/**
+ * @brief gets all the leaves in the expression tree
+ *
+ * @param root the node to start from
+ * @return shared pointers to the leaves of the tree
+ */
+std::vector<std::shared_ptr<ExpressionNode>>
+    ExpressionNode::getLeaves(std::shared_ptr<ExpressionNode> root)
+{
+    std::vector<std::shared_ptr<ExpressionNode>> leaves;
+    this->getLeavesHelper(root, leaves);
+    return leaves;
+}
+void ExpressionNode::getLeavesHelper(std::shared_ptr<ExpressionNode> node,
+                std::vector<std::shared_ptr<ExpressionNode>>& leaves) {
+    if (!node)
+    {
+        return;
+    }
+
+    // If the node is a leaf (no children), add it to the list
+    if (!node->getLeft() && !node->getRight())
+    {
+        leaves.emplace_back(node);
+        return;
+    }
+
+    // Recursively gather leaves from the left and right subtrees
+    this->getLeavesHelper(node->getLeft(), leaves);
+    this->getLeavesHelper(node->getRight(), leaves);
+}
+
+
+std::string ExpressionNode::getFullStr()
+{
+    if (this->getType() == TokenType::FUNCTION)
+    {
+        return std::dynamic_pointer_cast<Function>
+                        (this->getToken())->getFullStr();
+    }
+    if (this->getType() == TokenType::VARIABLE)
+    {
+        return std::dynamic_pointer_cast<Variable>
+                        (this->getToken())->getFullStr();
+    }
+    return this->getToken()->getFullStr();
+}
+
+std::shared_ptr<ExpressionNode> ExpressionNode::makeNegative()
+{
+    
+    // Create a node for -1
+    auto negativeOne = std::make_shared<Number>("-1", -1);
+    auto negativeOneNode = std::make_shared<ExpressionNode>(negativeOne);
+
+    // Create a multiplication node
+    auto timesToken = std::make_shared<Operator>("*");
+    auto timesNode = std::make_shared<ExpressionNode>(timesToken);
+
+    auto copyNode = this->copyTree();
+
+    timesNode->setLeft(negativeOneNode);
+    timesNode->setRight(copyNode);  
+
+    // Update parent pointers
+    auto parent_ptr = this->getParent().lock();
+    if (parent_ptr)
+    {
+        if (parent_ptr->getLeft() == shared_from_this())
+        {
+            parent_ptr->setLeft(timesNode);
+        }
+        else if (parent_ptr->getRight() == shared_from_this())
+        {
+            parent_ptr->setRight(timesNode);
+        }
+    }
+
+    // Set the parent of the new timesNode and its children
+    timesNode->setParent(parent);
+    negativeOneNode->setParent(timesNode);
+    this->setParent(timesNode);
+
+    return timesNode;
+}
+
+std::shared_ptr<ExpressionNode> ExpressionNode::copyTree()
+{
+    auto copyNode = std::make_shared<ExpressionNode>(this->token);
+    if (this->getLeft())
+    {
+        copyNode->setLeft(this->getLeft()->copyTree());
+    }
+    if (this->getRight())
+    {
+        copyNode->setRight(this->getRight()->copyTree());
+    }
+    
+    if (this->getDerivative())
+    {
+        copyNode->setDerivative(this->getDerivative());
+    }
+    return copyNode;
 }

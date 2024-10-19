@@ -30,6 +30,21 @@ public:
     ExpressionNode(std::shared_ptr<Token> token);
 
     /**
+     * @brief Constructs a tree from a postfix input
+     *
+     * @param token The token that the node represents.
+     */
+    ExpressionNode(TokenQueue queue);
+
+    /**
+     * @brief creates expression tree from a postfix input
+     * 
+     * @param queue 
+     * @return std::shared_ptr<ExpressionNode> the root of the tree
+     */
+    static std::shared_ptr<ExpressionNode> buildTree(TokenQueue queue);
+
+    /**
      * @brief Adds a child node to this node.
      *
      * @details Attempts to set the provided node as the left child. If the
@@ -196,13 +211,20 @@ public:
     bool isLeaf();
     void replaceWithRightChild();
     void replaceWithLeftChild();
-
+    std::string getFullStr();
+    std::vector<std::shared_ptr<ExpressionNode>>
+        getLeaves(std::shared_ptr<ExpressionNode> root);
+    std::shared_ptr<ExpressionNode> makeNegative();
+    std::shared_ptr<ExpressionNode> copyTree();
 protected:
     std::shared_ptr<Token> token;
     std::weak_ptr<ExpressionNode> parent;
     std::shared_ptr<ExpressionNode> leftChild;
     std::shared_ptr<ExpressionNode> rightChild;
     std::shared_ptr<ExpressionNode> derivative;
+    void getLeavesHelper(std::shared_ptr<ExpressionNode> node,
+                std::vector<std::shared_ptr<ExpressionNode>>& leaves);
+    
     
 }; 
 #endif // __EXPRESSION_NODE_HPP__
