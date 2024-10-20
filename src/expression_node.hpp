@@ -214,8 +214,8 @@ public:
     std::string getFullStr();
     std::vector<std::shared_ptr<ExpressionNode>>
         getLeaves(std::shared_ptr<ExpressionNode> root);
-    std::shared_ptr<ExpressionNode> makeNegative();
     std::shared_ptr<ExpressionNode> copyTree();
+    void replaceNode(std::shared_ptr<ExpressionNode> newNode);
 protected:
     std::shared_ptr<Token> token;
     std::weak_ptr<ExpressionNode> parent;

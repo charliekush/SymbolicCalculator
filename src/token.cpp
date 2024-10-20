@@ -232,6 +232,14 @@ Number::Number(const std::string& str, double value) :
     if (value < 0)
     {
         this->flipSign();
+        if (!str.empty())
+        {
+            if (str[0] == '-')
+            {
+                this->str.erase(0,1);
+            
+            }
+        }
     }
 }
 
@@ -242,6 +250,19 @@ Number::Number(const std::string& str, double value) :
  */
 Number::Number(const std::string& str, int value) :
     Token(TokenType::NUMBER, str), value(value), type(NumberType::INTEGER) {
+        
+    if (value < 0)
+    {
+        this->flipSign();
+        if (!str.empty())
+        {
+            if (str[0] == '-')
+            {
+                this->str.erase(0,1);
+            
+            }
+        }
+    }
 }
 
 /**
@@ -294,21 +315,6 @@ double Number::getDouble() const
 
 void Number::flipSign() {
     this->setNegative(!this->isNegative());
-    // Use std::visit to apply the sign flip to the variant value
-    std::visit([this](auto& val) {
-        // Get the type of the variant value
-        using T = std::decay_t<decltype(val)>;
-        if constexpr (std::is_integral_v<T>)
-        {
-            // Handle integral type (int)
-            val = -val;
-        }
-        else if constexpr (std::is_floating_point_v<T>)
-        {
-            // Handle floating-point type (double)
-            val = -val;
-        }
-    }, value);
 }
 LeftParenthesis::LeftParenthesis() : Token(TokenType::LEFTPAREN, "(") {};
 

@@ -321,33 +321,14 @@ bool ExpressionNode::isLeaf()
 void ExpressionNode::replaceWithLeftChild() {
     // Get the left child
     std::shared_ptr<ExpressionNode> left = this->getLeft();
-
-    // If there is no left child, just return
     if (!left)
     {
         return;
     }
-
-    // Set the left child's parent to this node's parent
-    if (auto parentPtr = parent.lock())
-    {
-        if (parentPtr->getLeft() == shared_from_this())
-        {
-            parentPtr->setLeft(left);
-        }
-        else if (parentPtr->getRight() == shared_from_this())
-        {
-            parentPtr->setRight(left);
-        }
-    }
-    // Update left child's parent to the current parent
-    left->setParent(parent);
-
-    // Remove and delete the right child
-    removeRightChild();
-
-    // Clear this node's parent
-    removeParent();
+    this->setToken(left->getToken());
+    this->setDerivative(left->getDerivative());
+    this->setLeft(left->getLeft());
+    this->setRight(left->getRight());
 }
 
 void ExpressionNode::replaceWithRightChild() {
@@ -360,26 +341,10 @@ void ExpressionNode::replaceWithRightChild() {
         return;
     }
 
-    // Set the right child's parent to this node's parent
-    if (auto parentPtr = parent.lock())
-    {
-        if (parentPtr->getLeft() == shared_from_this())
-        {
-            parentPtr->setLeft(right);
-        }
-        else if (parentPtr->getRight() == shared_from_this())
-        {
-            parentPtr->setRight(right);
-        }
-    }
-    // Update right child's parent to the current parent
-    right->setParent(parent); 
-
-    // Remove and delete the left child
-    removeLeftChild();
-
-    // Clear this node's parent
-    removeParent();
+    this->setToken(right->getToken());
+    this->setDerivative(right->getDerivative());
+    this->setLeft(right->getLeft());
+    this->setRight(right->getRight());
 }
 
 
@@ -433,43 +398,6 @@ std::string ExpressionNode::getFullStr()
     return this->getToken()->getFullStr();
 }
 
-std::shared_ptr<ExpressionNode> ExpressionNode::makeNegative()
-{
-    
-    // Create a node for -1
-    auto negativeOne = std::make_shared<Number>("-1", -1);
-    auto negativeOneNode = std::make_shared<ExpressionNode>(negativeOne);
-
-    // Create a multiplication node
-    auto timesToken = std::make_shared<Operator>("*");
-    auto timesNode = std::make_shared<ExpressionNode>(timesToken);
-
-    auto copyNode = this->copyTree();
-
-    timesNode->setLeft(negativeOneNode);
-    timesNode->setRight(copyNode);  
-
-    // Update parent pointers
-    auto parent_ptr = this->getParent().lock();
-    if (parent_ptr)
-    {
-        if (parent_ptr->getLeft() == shared_from_this())
-        {
-            parent_ptr->setLeft(timesNode);
-        }
-        else if (parent_ptr->getRight() == shared_from_this())
-        {
-            parent_ptr->setRight(timesNode);
-        }
-    }
-
-    // Set the parent of the new timesNode and its children
-    timesNode->setParent(parent);
-    negativeOneNode->setParent(timesNode);
-    this->setParent(timesNode);
-
-    return timesNode;
-}
 
 std::shared_ptr<ExpressionNode> ExpressionNode::copyTree()
 {
@@ -489,3 +417,4 @@ std::shared_ptr<ExpressionNode> ExpressionNode::copyTree()
     }
     return copyNode;
 }
+

@@ -21,8 +21,8 @@ std::string LaTeXConverter::nodeToLaTeX(std::shared_ptr<ExpressionNode> node)
 
     auto token = node->getToken();
     TokenType type = token->getType();
-    std::cout << "\nToken " << node->getFullStr() << "\n";
-    std::cout << "Type " << Lookup::getTokenType(type) << "\n";
+    //std::cout << "\nToken " << node->getFullStr() << "\n";
+    //std::cout << "Type " << Lookup::getTokenType(type) << "\n";
     std::string out;
     if (TokenType::OPERATOR == type)
     {
@@ -46,7 +46,7 @@ std::string LaTeXConverter::nodeToLaTeX(std::shared_ptr<ExpressionNode> node)
                     << " \\cdot " 
                     << nodeToLaTeX(node->getRight());
         }
-        else if (op == "/") 
+        else if (op == "/")
         {
             latex << "\\dfrac{" << nodeToLaTeX(node->getLeft()) << "}"
                     << "{" << nodeToLaTeX(node->getRight()) << "}";
@@ -64,6 +64,7 @@ std::string LaTeXConverter::nodeToLaTeX(std::shared_ptr<ExpressionNode> node)
     }
     else
     {
+        out = "{" + node->getFullStr() + "}";
         out =  "{" + node->getFullStr() + "}";
     }
     std::cout << "Found " << out << "\n";

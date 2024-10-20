@@ -182,7 +182,6 @@ void Tokenizer::parseExpression()
     {
         this->clearSubstr();
     }
-
 }
 void Tokenizer::handleUnary()
 {
@@ -545,7 +544,8 @@ void Tokenizer::fixEulers()
         this->output.emplace_back(std::make_shared<Number>("1", 1));
         this->output.emplace_back(std::make_shared<RightParenthesis>());
     }
-    else if (!(this->output[this->tokensIdx + 1]->getType() == TokenType::OPERATOR
+    else if (
+        !(this->output[this->tokensIdx + 1]->getType() == TokenType::OPERATOR
         && this->output[this->tokensIdx + 1]->getStr() != "^"))
     {
         auto itr = this->tokensIdx + 1;

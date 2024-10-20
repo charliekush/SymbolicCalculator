@@ -40,6 +40,8 @@ Derivative::Derivative(std::string input, std::string wrt)
 }
 
 
+
+
 std::shared_ptr<ExpressionNode> Derivative::solve()
 {
     TreeFixer::checkTree(this->root);
@@ -79,13 +81,12 @@ std::shared_ptr<ExpressionNode> Derivative::solve(nodePtr node)
             func->update(node);
 
             // Example usage: get the derivative and evaluate
-            std::string nodeStr = LaTeXConverter::convertToLaTeX(node);
+            //std::string nodeStr = LaTeXConverter::convertToLaTeX(node);
             auto deriv = func->getDerivative();
             TreeFixer::checkTree(deriv);
             node->setDerivative(deriv);
-            std::string derivStr = LaTeXConverter::convertToLaTeX(deriv);
-            std::cout << "Derivative of " << nodeStr << ": " << derivStr
-                << "\n\n";
+            //std::string derivStr = LaTeXConverter::convertToLaTeX(deriv);
+            //std::cout << "Derivative of " << nodeStr << ": " << derivStr<< "\n\n";
             
         }
         

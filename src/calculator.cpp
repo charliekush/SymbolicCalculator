@@ -1,5 +1,8 @@
 #include "calculator.hpp"
 
+#include "latex_converter.hpp"
+#include <iostream>
+
 #include <cmath>
 
 std::shared_ptr<Number> Arithmetic::performOperation(const operation& op,
@@ -16,14 +19,21 @@ std::shared_ptr<Number> Arithmetic::performOperation(const operation& op,
             {
                 int result = left->getInt() / right->getInt();
                 // return int
-                return std::make_shared<Number>(std::to_string(result), result);
+                auto out = std::make_shared<Number>(std::to_string(result),
+                                                                        result);
+                out->setNegative(result < 0);
+                return out;
             }
             else
             {
 
-                double result = static_cast<double>(left->getInt()) / right->getInt();
+                double result = static_cast<double>(left->getInt()) /
+                    right->getInt();
                 // Return a float
-                return std::make_shared<Number>(std::to_string(result), result);
+                auto out = std::make_shared<Number>(std::to_string(result),
+                                                                    result);
+                out->setNegative(result < 0);
+                return out;
 
             }
         }
@@ -34,7 +44,11 @@ std::shared_ptr<Number> Arithmetic::performOperation(const operation& op,
     {
         int result = static_cast<int>(op(left->getInt(), right->getInt()));
         // Return an int
-        return std::make_shared<Number>(std::to_string(result), result);
+        auto out = std::make_shared<Number>(std::to_string(result), result);
+        out->setNegative(result < 0);
+        return out;
+
+
     }
 
     // Handle mixed types or doubles
@@ -59,10 +73,14 @@ std::shared_ptr<Number> Arithmetic::performOperation(const operation& op,
     double floatPart = std::modf(result, &floatPart);
     if (floatPart == 0.0)
     {
-        return std::make_shared<Number>(std::to_string((int)result),
+        auto out = std::make_shared<Number>(std::to_string((int)result),
                                                                 (int)result);
+        out->setNegative(result < 0);
+        return out;
     }
-    return std::make_shared<Number>(std::to_string(result), result);
+    auto out = std::make_shared<Number>(std::to_string(result), result);
+    out->setNegative(result < 0);
+    return out;
 }
 
 std::shared_ptr<Number> Arithmetic::divide(nodePtr node, numPtr left,
@@ -125,7 +143,7 @@ void Arithmetic::setNodeToZero(nodePtr operatorNode) {
     operatorNode->removeRightChild();
     operatorNode->setToken(std::make_shared<Number>("0", 0));
     operatorNode->setDerivative(std::make_shared<ExpressionNode>(
-                                    std::make_shared<Number>("0", 0)));
+        std::make_shared<Number>("0", 0)));
 }
 
 void Arithmetic::setNodeToOne(nodePtr operatorNode) {
@@ -133,7 +151,7 @@ void Arithmetic::setNodeToOne(nodePtr operatorNode) {
     operatorNode->removeRightChild();
     operatorNode->setToken(std::make_shared<Number>("1", 1));
     operatorNode->setDerivative(std::make_shared<ExpressionNode>(
-                                    std::make_shared<Number>("0", 0)));
+        std::make_shared<Number>("0", 0)));
 }
 
 void Arithmetic::simplify(nodePtr node, numPtr left, numPtr right)
@@ -171,7 +189,7 @@ void Arithmetic::simplifyExponent(nodePtr operatorNode)
         operatorNode->removeRightChild();
         operatorNode->setToken(value);
         operatorNode->setDerivative(std::make_shared<ExpressionNode>(
-                                        std::make_shared<Number>("0", 0)));
+            std::make_shared<Number>("0", 0)));
     }
     else if (leftNum)
     {
@@ -185,7 +203,7 @@ void Arithmetic::simplifyExponent(nodePtr operatorNode)
             operatorNode->removeRightChild();
             operatorNode->setToken(std::make_shared<Number>("1", 1));
             operatorNode->setDerivative(std::make_shared<ExpressionNode>(
-                                            std::make_shared<Number>("0", 0)));
+                std::make_shared<Number>("0", 0)));
         }
     }
     else if (rightNum)
@@ -196,7 +214,7 @@ void Arithmetic::simplifyExponent(nodePtr operatorNode)
             operatorNode->removeRightChild();
             operatorNode->setToken(std::make_shared<Number>("1", 1));
             operatorNode->setDerivative(std::make_shared<ExpressionNode>(
-                                        std::make_shared<Number>("0", 0)));
+                std::make_shared<Number>("0", 0)));
         }
         else if (rightNum->equals(1))
         {
@@ -216,7 +234,7 @@ void Arithmetic::simplifyMultiplication(nodePtr operatorNode)
         operatorNode->removeRightChild();
         operatorNode->setToken(value);
         operatorNode->setDerivative(std::make_shared<ExpressionNode>(
-                                        std::make_shared<Number>("0", 0)));
+            std::make_shared<Number>("0", 0)));
     }
     else if (leftNum)
     {
@@ -254,7 +272,7 @@ void Arithmetic::simplifyDivision(nodePtr operatorNode)
         operatorNode->removeRightChild();
         operatorNode->setToken(value);
         operatorNode->setDerivative(std::make_shared<ExpressionNode>(
-                                        std::make_shared<Number>("0", 0)));
+            std::make_shared<Number>("0", 0)));
     }
     else if (leftNum)
     {
@@ -287,7 +305,7 @@ void Arithmetic::simplifyAddition(nodePtr operatorNode)
         operatorNode->removeRightChild();
         operatorNode->setToken(value);
         operatorNode->setDerivative(std::make_shared<ExpressionNode>(
-                                        std::make_shared<Number>("0", 0)));
+            std::make_shared<Number>("0", 0)));
     }
     else if (leftNum)
     {
@@ -317,7 +335,7 @@ void Arithmetic::simplifySubtraction(nodePtr operatorNode)
         operatorNode->removeRightChild();
         operatorNode->setToken(value);
         operatorNode->setDerivative(std::make_shared<ExpressionNode>(
-                                        std::make_shared<Number>("0", 0)));
+            std::make_shared<Number>("0", 0)));
     }
     else if (leftNum)
     {
@@ -348,7 +366,7 @@ std::shared_ptr<ExpressionNode> Operation::times(nodePtr left, nodePtr right)
     auto node = std::make_shared<ExpressionNode>(opToken);
     node->setLeft(left);
     node->setRight(right);
-    
+
     return node;
 }
 std::shared_ptr<ExpressionNode> Operation::divide(nodePtr left, nodePtr right)
@@ -357,7 +375,7 @@ std::shared_ptr<ExpressionNode> Operation::divide(nodePtr left, nodePtr right)
     auto node = std::make_shared<ExpressionNode>(opToken);
     node->setLeft(left);
     node->setRight(right);
-    
+
     return node;
 }
 std::shared_ptr<ExpressionNode> Operation::add(nodePtr left, nodePtr right)
@@ -366,43 +384,53 @@ std::shared_ptr<ExpressionNode> Operation::add(nodePtr left, nodePtr right)
     auto node = std::make_shared<ExpressionNode>(opToken);
     node->setLeft(left);
     node->setRight(right);
-    
+
     return node;
 }
-std::shared_ptr<ExpressionNode> Operation::subtract(nodePtr left, 
+std::shared_ptr<ExpressionNode> Operation::subtract(nodePtr left,
                                                             nodePtr right)
 {
     auto opToken = std::make_shared<Operator>("-");
     auto node = std::make_shared<ExpressionNode>(opToken);
     node->setLeft(left);
     node->setRight(right);
-    
+
     return node;
 }
-std::shared_ptr<ExpressionNode> Operation::power(nodePtr left, 
+std::shared_ptr<ExpressionNode> Operation::power(nodePtr left,
                                                             nodePtr right)
 {
     auto opToken = std::make_shared<Operator>("^");
     auto node = std::make_shared<ExpressionNode>(opToken);
     node->setLeft(left);
     node->setRight(right);
-    
+
     return node;
 }
 
 void TreeFixer::checkTree(nodePtr node)
 {
+    
     if (node->getType() == TokenType::FUNCTION)
     {
         auto function = std::dynamic_pointer_cast<Function>(node->getToken());
         TreeFixer::checkTree(function->getSubExprTree());
     }
-    
+
     if (node->getType() != TokenType::NUMBER && node->getToken()->isNegative())
     {
-        TreeFixer::expandNegative(node);
+        
+        
+        
+        nodePtr expanded = TreeFixer::expandNegative(node);
+        node->setToken(expanded->getToken());
+        node->setDerivative(expanded->getDerivative());
+        node->setLeft(expanded->getLeft());
+        node->setRight(expanded->getRight());
+
+        
     }
-    if(node->getType() == TokenType::OPERATOR)
+    if (node->getType() == TokenType::OPERATOR)
     {
         TreeFixer::checkChildren(node);
         TreeFixer::checkTree(node->getLeft());
@@ -412,6 +440,7 @@ void TreeFixer::checkTree(nodePtr node)
 
 void TreeFixer::checkChildren(nodePtr node)
 {
+    
     auto left = node->getLeft();
     auto right = node->getRight();
 
@@ -438,15 +467,29 @@ void TreeFixer::checkChildren(nodePtr node)
     }
 }
 
-std::shared_ptr<ExpressionNode> 
-    TreeFixer::expandNegative(std::shared_ptr<ExpressionNode> node)
+std::shared_ptr<ExpressionNode> TreeFixer::expandNegative(nodePtr node)
 {
-    if (node->getType() != TokenType::NUMBER && node->getToken()->isNegative())
-    {
-        // Flip the sign of the original node's token to make it positive
-        node->getToken()->flipSign();
-        return node->makeNegative();
-        
-    }
-    return node;
+    
+    // Flip the sign of the original node's token to make it positive
+    node->getToken()->flipSign();
+
+    // Create -1 node
+    auto negativeOne = std::make_shared<Number>("1", 1);
+    negativeOne->setNegative(true);
+    auto negativeOneNode = std::make_shared<ExpressionNode>(negativeOne);
+
+    // New parent '*' pointer
+    auto timesToken = std::make_shared<Operator>("*");
+    auto timesNode = std::make_shared<ExpressionNode>(timesToken);
+
+    // Copy of current node
+    auto copyNode = node->copyTree();
+
+    timesNode->setLeft(negativeOneNode);
+    timesNode->setRight(copyNode);
+
+    
+    
+    return timesNode;
+    
 }

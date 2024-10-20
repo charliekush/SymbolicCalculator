@@ -13,7 +13,6 @@ private:
     std::shared_ptr<Variable> diffVar;
 public:
     Derivative(std::string input, std::string wrt);
-
     /**
      * @brief calculates the derivative of the entire tree
      * 
