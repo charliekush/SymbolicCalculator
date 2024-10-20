@@ -11,6 +11,7 @@
 #include "token.hpp"
 
 #include <memory>
+#include <vector>
 
 class ExpressionNode : public std::enable_shared_from_this<ExpressionNode>
 {

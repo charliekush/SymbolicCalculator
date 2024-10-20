@@ -12,7 +12,7 @@ class Arithmetic
     typedef std::shared_ptr<Number> numPtr;
     typedef std::function<double(double, double)> operation;
 public:
-    static numPtr performOperation(const operation& op, numPtr left, 
+    static numPtr performOperation(const Operation& op, numPtr left, 
                                 numPtr right, bool isDivision);
     static numPtr power(nodePtr operatorNode, numPtr left, numPtr right);
     static numPtr multiply(nodePtr operatorNode, numPtr left, numPtr right);

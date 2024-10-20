@@ -5,6 +5,7 @@
 
 #include <cmath>
 
+
 std::shared_ptr<Number> Arithmetic::performOperation(const operation& op,
                             numPtr left, numPtr right, bool isDivision = false)
 {
