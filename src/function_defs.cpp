@@ -1,6 +1,7 @@
 #include "function_defs.hpp"
 #include "calculator.hpp"
 
+#include <cmath>
 
 FunctionDefinition::FunctionDefinition(std::shared_ptr<ExpressionNode> node)
     : node(node){}
