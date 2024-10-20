@@ -6,6 +6,19 @@
 
 #include <memory>
 
+
+class Operation
+{
+    typedef std::shared_ptr<ExpressionNode> nodePtr;
+    
+public:
+    static nodePtr times(nodePtr left, nodePtr right);
+    static nodePtr divide(nodePtr left, nodePtr right);
+    static nodePtr add(nodePtr left, nodePtr right);
+    static nodePtr subtract(nodePtr left, nodePtr right);
+    static nodePtr power(nodePtr left, nodePtr right);
+};
+
 class Arithmetic
 {
     typedef std::shared_ptr<ExpressionNode> nodePtr;
@@ -35,17 +48,7 @@ public:
 };
 
 
-class Operation
-{
-    typedef std::shared_ptr<ExpressionNode> nodePtr;
-    
-public:
-    static nodePtr times(nodePtr left, nodePtr right);
-    static nodePtr divide(nodePtr left, nodePtr right);
-    static nodePtr add(nodePtr left, nodePtr right);
-    static nodePtr subtract(nodePtr left, nodePtr right);
-    static nodePtr power(nodePtr left, nodePtr right);
-};
+
 
 class TreeFixer
 {   
