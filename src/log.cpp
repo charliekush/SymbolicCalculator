@@ -177,7 +177,14 @@ void Logger::addBrace(std::string c, bool endComma)
     
 }
 
-
+void Logger::logTest(std::string testStr, bool pass)
+{
+    tests.emplace_back(std::make_pair(testStr,pass));
+}
+void Logger::logApprox(double sub, double out)
+{
+    approximations.emplace_back(std::make_pair(sub, out));
+}
 
 std::string Logger::out()
 {
@@ -214,6 +221,42 @@ std::string Logger::out()
     
     this->addPair("input", this->input);
     this->addPair("output", this->output);
+    if (this->tests.size() > 0 )
+    {
+        this->addLine("equality tests",false);
+        this->addBrace("[");
+        for (int i = 0; i < tests.size(); i++)
+        {
+            this->outStr += this->indent() + str(tests[i].first) + ": " + 
+                        (tests[i].second ? "true" : "false");
+            if ((i + 1) != tests.size())
+            {
+                this->outStr += ",";
+            }
+            this->outStr += "\n";
+
+        }
+        this->addBrace("]",true);
+    }
+    if (this->approximations.size() > 0 )
+    {
+        this->addLine("approximations",false);
+        this->addBrace("[");
+        for (int i = 0; i < tests.size(); i++)
+        {
+            this->outStr += this->indent() + 
+                std::to_string(approximations[i].first) + ": " + 
+                 std::to_string(approximations[i].second) ;
+            if ((i + 1) != approximations.size())
+            {
+                this->outStr += ",";
+            }
+            this->outStr += "\n";
+
+        }
+        this->addBrace("]",true);
+    }
+    
     this->addPair("mode", this->mode,false);
     this->addBrace("}");
     

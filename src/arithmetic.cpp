@@ -201,8 +201,7 @@ void Arithmetic::simplifyExponent(nodePtr& operatorNode)
         auto value = Arithmetic::power(operatorNode, leftNum, rightNum);
         if (value)
         {
-            std::cout << leftNum->getStr() << "^" << rightNum->getStr() 
-                    << " = " << value->getStr() << "\n";
+            //std::cout << leftNum->getStr() << "^" << rightNum->getStr() << " = " << value->getStr() << "\n";
             operatorNode->removeLeftChild();
             operatorNode->removeRightChild();
             operatorNode->setToken(value);
@@ -254,8 +253,7 @@ void Arithmetic::simplifyMultiplication(nodePtr& operatorNode)
         auto value = Arithmetic::multiply(operatorNode, leftNum, rightNum);
         if (value)
         {
-            std::cout << leftNum->getStr() << "*" << rightNum->getStr() 
-                    << " = " << value->getStr() << "\n";
+            //std::cout << leftNum->getStr() << "*" << rightNum->getStr() << " = " << value->getStr() << "\n";
             operatorNode->removeLeftChild();
             operatorNode->removeRightChild();
             operatorNode->setToken(value);
@@ -299,8 +297,7 @@ void Arithmetic::simplifyDivision(nodePtr& operatorNode)
         auto value = Arithmetic::divide(operatorNode, leftNum, rightNum);
         if (value)
         {
-            std::cout << leftNum->getStr() << "/" << rightNum->getStr() 
-                    << " = " << value->getStr() << "\n";
+            //std::cout << leftNum->getStr() << "/" << rightNum->getStr() << " = " << value->getStr() << "\n";
             operatorNode->removeLeftChild();
             operatorNode->removeRightChild();
             operatorNode->setToken(value);
@@ -339,8 +336,7 @@ void Arithmetic::simplifyAddition(nodePtr& operatorNode)
         auto value = Arithmetic::add(operatorNode, leftNum, rightNum);
         if (value)
         {
-            std::cout << leftNum->getStr() << "+" << rightNum->getStr() 
-                    << " = " << value->getStr() << "\n";
+            //std::cout << leftNum->getStr() << "+" << rightNum->getStr() << " = " << value->getStr() << "\n";
             operatorNode->removeLeftChild();
             operatorNode->removeRightChild();
             operatorNode->setToken(value);
@@ -375,8 +371,7 @@ void Arithmetic::simplifySubtraction(nodePtr& operatorNode)
         auto value = Arithmetic::subtract(operatorNode, leftNum, rightNum);
         if (value)
         {
-            std::cout << leftNum->getStr() << "-" << rightNum->getStr() 
-                    << " = " << value->getStr() << "\n";
+            //std::cout << leftNum->getStr() << "-" << rightNum->getStr() << " = " << value->getStr() << "\n";
             operatorNode->removeLeftChild();
             operatorNode->removeRightChild();
             operatorNode->setToken(value);

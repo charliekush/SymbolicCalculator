@@ -6,6 +6,7 @@
 #include <memory>
 #include <vector>
 #include <string>
+#include <utility>
 
 class Logger
 {
@@ -24,7 +25,9 @@ private:
                                             bool endComma=true);
     std::string outStr;
     void addBrace(std::string c, bool endComma=false);
-    std::string cleanBraces(const std::string& input);
+    std::vector<std::pair<std::string,bool>> tests;
+    std::vector<std::pair<double,double>> approximations;
+
 public:
     Logger(bool useLaTeX);
     void setInput(std::string input);
@@ -36,6 +39,8 @@ public:
     void logPowerRule(nodePtr node);
     void logAddition(nodePtr node);
     void logSubtraction(nodePtr node);
+    void logTest(std::string testStr, bool pass);
+    void logApprox(double sub, double out);
     std::string out();
     
 };

@@ -16,14 +16,18 @@ private:
     nodePtr derivative;
     double value;
     std::shared_ptr<Variable> diffVar;
-    std::shared_ptr<Token> replaceToken(nodePtr node);
+    static std::shared_ptr<Token> replaceToken(nodePtr node, 
+                                                std::shared_ptr<Variable> wrt, 
+                                                double value);
 public:
     Approx(std::string raw_input, std::string diffVar, double value);
     
     std::pair<double,double> approximate();
-    double approximate(nodePtr root);
+    static double approximate(nodePtr node, 
+                        std::shared_ptr<Variable> wrt, 
+                        double value);
     
 };
 
 
-#endif //                
+#endif 
