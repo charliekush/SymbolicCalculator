@@ -6,6 +6,7 @@
 #include "lookup.hpp"
 
 #include <iostream>
+#include <cmath>
 
 
 
