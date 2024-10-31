@@ -103,7 +103,7 @@ private:
      */
     void parseExpression();
 
-    void nextImplicit();
+    void nextImplicit(TokenVector& vec);
     /**
      * @brief Parses a number token from the input string.
      * @return The parsed Number token.
