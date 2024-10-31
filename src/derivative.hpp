@@ -3,6 +3,7 @@
 
 
 #include "expression_node.hpp"
+#include "log.hpp"
 
 #include <memory>
 class Derivative
@@ -12,7 +13,9 @@ private:
     nodePtr root;
     std::shared_ptr<Variable> diffVar;
 public:
+    Logger log;
     Derivative(std::string input, std::string wrt);
+    Derivative(nodePtr root, std::shared_ptr<Variable> wrt);
     /**
      * @brief calculates the derivative of the entire tree
      * 
@@ -34,7 +37,7 @@ public:
     nodePtr productRule(nodePtr root);
     nodePtr quotientRule(nodePtr root);
     nodePtr chainRule(nodePtr root);
-    nodePtr simplify(nodePtr node);
+    
 
     
 

@@ -3,16 +3,21 @@
 #include "token.hpp"
 #include "tokenizer.hpp"
 #include "postfix.hpp"
-#include "lookup.hpp"
-#include "calculator.hpp"
+#include "arithmetic.hpp"
 #include "lookup.hpp"
 #include "latex_converter.hpp"
+#include "operation.hpp"
+#include "tree_fixer.hpp"
+
 #include <iostream>
 #include <stdexcept>
 #include <cmath>
 
-Derivative::Derivative(std::string input, std::string wrt)
+Derivative::Derivative(std::string input, std::string wrt) : log(false)
 {
+    log.setInput(input);
+    log.setMode("Derivative");
+    
     Tokenizer parser(input);
     Tokenizer diffVarParser(wrt);
     auto diffVarParsed = diffVarParser.tokenize();
@@ -33,62 +38,86 @@ Derivative::Derivative(std::string input, std::string wrt)
             diffVar->getFullStr() + "\n";
         throw std::runtime_error(errMsg.c_str());
     }
-
-    ShuntingYard converter(parser.tokenize());
-    this->root = ExpressionNode::buildTree(converter.getPostfix());
+    auto parsed = parser.tokenize();
+    ShuntingYard converter(parsed);
+    auto postfix = converter.getPostfix();
+    this->root = ExpressionNode::buildTree(postfix);
     TreeFixer::checkTree(this->root);
+    TreeFixer::simplify(this->root);
 }
 
+Derivative::Derivative(nodePtr root, std::shared_ptr<Variable> wrt) : log(false)
+{
+    this->diffVar = wrt;
+    this->root = root->copyTree();
+    TreeFixer::checkTree(this->root);
+    TreeFixer::simplify(this->root);
+}
 
 
 
 std::shared_ptr<ExpressionNode> Derivative::solve()
 {
     TreeFixer::checkTree(this->root);
-    this->simplify(this->root);
+    TreeFixer::simplify(this->root);
+    //this->root->printTree();
     auto derivative = this->solve(this->root);
-    return this->simplify(derivative);
+    
+    TreeFixer::simplify(derivative);
+    //derivative->printTree();
+    log.setOutput(derivative);
+    return derivative;
 }
 
 std::shared_ptr<ExpressionNode> Derivative::solve(nodePtr node)
 {
     if (node->getDerivative())
     {
+        
         return node->getDerivative();
     }
     if (!node->hasVariable(this->diffVar))
     {
+        //std::cout << "The expression " <<  LaTeXConverter::convertToLaTeX(node)
+        //<< " does not contain the variable, setting derivative to zero\n";
         node->setDerivative(std::make_shared<ExpressionNode>(
             std::make_shared<Number>("0", 0)));
+        
     }
     else if (node->getType() == TokenType::VARIABLE)
     {
         node->setDerivative(std::make_shared<ExpressionNode>(
             std::make_shared<Number>("1", 1)));
+        //std::cout << "The expression " <<  LaTeXConverter::convertToLaTeX(node)
+        //<< " is just the variable wrt, setting derivative to 1\n";
     }
     else if (node->getType() == TokenType::FUNCTION)
     {
         auto original = std::dynamic_pointer_cast<Function>(node->getToken());
-        auto subExprDerivative = this->solve(
-                original->getSubExprTree()->copyTree());
-        node->setDerivative(subExprDerivative);
+        auto subTree = original->getSubExprTree()->copyTree();
+        auto subExprDerivative = this->solve(subTree);
+        node->setDerivative(subExprDerivative->copyTree());
         auto funcIter = Lookup::functionLookup.find(node->getStr());
         if (funcIter != Lookup::functionLookup.end())
         {
             auto func = funcIter->second;
 
-            // Set up the function with the expression node
+             
             func->update(node);
 
-            // Example usage: get the derivative and evaluate
-            //std::string nodeStr = LaTeXConverter::convertToLaTeX(node);
+            
             auto deriv = func->getDerivative();
             TreeFixer::checkTree(deriv);
             node->setDerivative(deriv);
-            //std::string derivStr = LaTeXConverter::convertToLaTeX(deriv);
-            //std::cout << "Derivative of " << nodeStr << ": " << derivStr<< "\n\n";
+            
             
         }
+        log.logChainRule(node, subExprDerivative);
+        /*std::cout << "\nDerivative of "
+            << LaTeXConverter::convertToLaTeX(node)
+            << " using chain rule is "
+            << LaTeXConverter::convertToLaTeX(node->getDerivative()) 
+            << "\n";*/
         
     }
     else if (node->getType() == TokenType::OPERATOR)
@@ -96,69 +125,49 @@ std::shared_ptr<ExpressionNode> Derivative::solve(nodePtr node)
         this->solveChildren(node);
         if (node->getStr() == "^")
         {
+            
             this->powerRule(node);
+            log.logPowerRule(node);
+                
         }
         else if (node->getStr() == "*")
         {
             this->productRule(node);
+            log.logProductRule(node);
+            /*std::cout << "\nDerivative of "
+                << LaTeXConverter::convertToLaTeX(node)
+                << " using productRule is "
+                << LaTeXConverter::convertToLaTeX(node->getDerivative()) 
+                << "\n";*/
         }
         else if (node->getStr() == "/")
         {
             this->quotientRule(node);
+            log.logQuotientRule(node);
+            /*std::cout << "\nDerivative of "
+                << LaTeXConverter::convertToLaTeX(node)
+                << " using quotientRule is "
+                << LaTeXConverter::convertToLaTeX(node->getDerivative()) 
+                << "\n";*/
         }
         else if (node->getStr() == "+")
         {
             node->setDerivative(Operation::add(node->getLeft()->getDerivative(),
                 node->getRight()->getDerivative()));
+            log.logAddition(node);
         }
         else if (node->getStr() == "-")
         {
             node->setDerivative(Operation::subtract(
                 node->getLeft()->getDerivative(),
                 node->getRight()->getDerivative()));
+            log.logSubtraction(node);
         }
         TreeFixer::checkTree(node->getDerivative());
+        TreeFixer::simplify(node->getDerivative());
     }
     return node->getDerivative();
 }
-
-std::shared_ptr<ExpressionNode> Derivative::simplify(nodePtr node)
-{
-    if (node->getType() == TokenType::OPERATOR)
-    {
-        this->simplify(node->getLeft());
-        this->simplify(node->getRight());
-        if (node->getStr() == "^")
-        {
-            Arithmetic::simplifyExponent(node);
-        }
-        else if (node->getStr() == "*")
-        {
-            Arithmetic::simplifyMultiplication(node);
-        }
-        else if (node->getStr() == "/")
-        {
-            Arithmetic::simplifyDivision(node);
-        }
-        else if (node->getStr() == "+")
-        {
-            Arithmetic::simplifyAddition(node);
-        }
-        else if (node->getStr() == "-")
-        {
-            Arithmetic::simplifySubtraction(node);
-        }
-    }
-    if (node->getType() == TokenType::FUNCTION)
-    {
-        auto func = std::dynamic_pointer_cast<Function>(node->getToken());
-        nodePtr newSubRoot = this->simplify(func->getSubExprTree());
-
-        func->setSubExprTree(newSubRoot);
-    }
-    return node;
-}
-
 
 
 
@@ -179,14 +188,14 @@ void Derivative::solveChildren(nodePtr node)
 
 std::shared_ptr<ExpressionNode> Derivative::powerRule(nodePtr node)
 {
-    this->solveChildren(node);
+    
 
     nodePtr base = node->getLeft();
     nodePtr exponent = node->getRight();
 
     bool baseContainsVar = base->hasVariable(this->diffVar);
     bool exponentContainsVar = exponent->hasVariable(this->diffVar);
-
+    nodePtr derivative;
     // Case 1: Base contains variable, exponent is constant
     if (baseContainsVar && !exponentContainsVar)
     {
@@ -195,9 +204,9 @@ std::shared_ptr<ExpressionNode> Derivative::powerRule(nodePtr node)
                     std::make_shared<Number>("1", 1)); \
             nodePtr exponentMinusOne = Operation::subtract(exponent, one);
 
-
-        node->setDerivative(Operation::times(exponent, Operation::power(
-            base, exponentMinusOne)));
+        derivative = Operation::times(exponent, 
+                                    Operation::power(base, exponentMinusOne));
+        
     }
     // Case 2: Base is constant, exponent contains variable
     else if (!baseContainsVar && exponentContainsVar)
@@ -209,8 +218,8 @@ std::shared_ptr<ExpressionNode> Derivative::powerRule(nodePtr node)
         auto lnBase = std::make_shared<ExpressionNode>(lnFunc);
 
         // Set the derivative using chain rule
-        node->setDerivative(Operation::times(Operation::power(base, exponent),
-            Operation::times(lnBase, exponent->getDerivative())));
+        derivative = Operation::times(Operation::power(base, exponent),
+            Operation::times(lnBase, exponent->getDerivative()));
     }
     // Case 3: Both base and exponent contain the variable
     else if (baseContainsVar && exponentContainsVar)
@@ -230,9 +239,11 @@ std::shared_ptr<ExpressionNode> Derivative::powerRule(nodePtr node)
 
         nodePtr totalDerivative = Operation::add(baseDerivativeTerm,
                                         exponentDerivativeTerm);
-        node->setDerivative(Operation::times(Operation::power(base, exponent),
-            totalDerivative));
+        derivative = Operation::times(Operation::power(base, exponent),
+            Operation::times(lnBase, exponent->getDerivative()));
     }
+    node->setDerivative(derivative);
+    TreeFixer::simplify(node->getDerivative());
     return node->getDerivative();
 }
 
@@ -241,35 +252,43 @@ std::shared_ptr<ExpressionNode> Derivative::powerRule(nodePtr node)
 
 std::shared_ptr<ExpressionNode> Derivative::productRule(nodePtr node)
 {
-    this->solveChildren(node);
-
     // Starting with d/dx u*v
     nodePtr u = node->getLeft();
     nodePtr v = node->getRight();
+    nodePtr du_dx = u->getDerivative();
+    nodePtr dv_dx = v->getDerivative();
 
     bool uContainsVar = u->hasVariable(this->diffVar);
     bool vContainsVar = v->hasVariable(this->diffVar);
 
+    // Log the terms and derivatives
+
+
     if (uContainsVar && vContainsVar)
     {
-        node->setDerivative(Operation::add(Operation::times(u, v->getDerivative()),
-            Operation::times(u->getDerivative(), v)));
+        node->setDerivative(Operation::add(Operation::times(u, dv_dx),
+                                           Operation::times(du_dx, v)));
+       
     }
     else if (uContainsVar)
     {
-        node->setDerivative(Operation::times(u->getDerivative(), v));
+        node->setDerivative(Operation::times(du_dx, v));
+        
     }
     else if (vContainsVar)
     {
-        node->setDerivative(Operation::times(u, v->getDerivative()));
+        node->setDerivative(Operation::times(u, dv_dx));
+        
     }
+
+    TreeFixer::simplify(node->getDerivative());
     return node->getDerivative();
 }
 
 
 std::shared_ptr<ExpressionNode> Derivative::quotientRule(nodePtr node)
 {
-    this->solveChildren(node);
+
 
     // Starting with d/dx [u/v]
     nodePtr u = node->getLeft();
