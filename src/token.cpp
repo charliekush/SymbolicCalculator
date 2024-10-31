@@ -13,6 +13,7 @@
 #include "lookup.hpp"
 #include "token_queue.hpp"
 
+#include <stdexcept>
 
  /**
   * @brief Constructs a Token with specified type and string.
@@ -144,11 +145,23 @@ Function::Function(const std::string& str) :
     this->subExprTree = nullptr;
     this->exponent = nullptr;
     this->subscript = nullptr;
+    if (Lookup::symbolTable.find(str) != Lookup::symbolTable.end())
+    {
+        this->properties =  Lookup::symbolTable[str].second;
+    }
+    else
+    {
+        throw std::runtime_error("Function not found!");
+    }
+    
 }
 
 void Function::setSubscript(std::shared_ptr<Number> base)
 {
-    this->subscript = base;
+    if (this->str != "log")
+    {
+        throw std::runtime_error( "Only log function can use subscripts");
+    } 
 }
 void Function::setExponent(std::shared_ptr<TokenQueue> exponent)
 {
@@ -168,7 +181,7 @@ void Function::setSubExpr(std::shared_ptr<TokenQueue> queue)
     this->subExpr = queue;
 }
 
-void Function::setSubExprTree(std::shared_ptr<ExpressionTree> tree)
+void Function::setSubExprTree(std::shared_ptr<ExpressionNode> tree)
 {
     this->subExprTree = tree;
 }
@@ -182,7 +195,7 @@ std::shared_ptr<TokenQueue> Function::getSubExpr()
 {
     return this->subExpr;
 }
-std::shared_ptr<ExpressionTree> Function::getSubExprTree()
+std::shared_ptr<ExpressionNode> Function::getSubExprTree()
 {
     return this->subExprTree;
 }
@@ -215,7 +228,20 @@ std::string Function::getFullStr()
  * @param value The numeric value (double).
  */
 Number::Number(const std::string& str, double value) :
-    Token(TokenType::NUMBER, str), value(value), type(NumberType::DOUBLE) {
+    Token(TokenType::NUMBER, str), value(value), type(NumberType::DOUBLE) 
+{
+    if (value < 0)
+    {
+        this->flipSign();
+        if (!str.empty())
+        {
+            if (str[0] == '-')
+            {
+                this->str.erase(0,1);
+            
+            }
+        }
+    }
 }
 
 /**
@@ -225,6 +251,19 @@ Number::Number(const std::string& str, double value) :
  */
 Number::Number(const std::string& str, int value) :
     Token(TokenType::NUMBER, str), value(value), type(NumberType::INTEGER) {
+        
+    if (value < 0)
+    {
+        this->flipSign();
+        if (!str.empty())
+        {
+            if (str[0] == '-')
+            {
+                this->str.erase(0,1);
+            
+            }
+        }
+    }
 }
 
 /**
@@ -252,7 +291,12 @@ bool Number::isDouble() const
  */
 int Number::getInt() const
 {
-    return std::get<int>(value);
+    int out = std::get<int>(value);
+    if (this->isNegative())
+    {
+        out *= -1;
+    }
+    return out;
 }
 
 /**
@@ -262,26 +306,16 @@ int Number::getInt() const
  */
 double Number::getDouble() const
 {
-    return std::get<double>(value);
+    double out = std::get<double>(value);
+    if (this->isNegative())
+    {
+        out *= -1.0;
+    }
+    return out;
 }
 
 void Number::flipSign() {
     this->setNegative(!this->isNegative());
-    // Use std::visit to apply the sign flip to the variant value
-    std::visit([this](auto& val) {
-        // Get the type of the variant value
-        using T = std::decay_t<decltype(val)>;
-        if constexpr (std::is_integral_v<T>)
-        {
-            // Handle integral type (int)
-            val = -val;
-        }
-        else if constexpr (std::is_floating_point_v<T>)
-        {
-            // Handle floating-point type (double)
-            val = -val;
-        }
-    }, value);
 }
 LeftParenthesis::LeftParenthesis() : Token(TokenType::LEFTPAREN, "(") {};
 
@@ -312,4 +346,46 @@ std::string Variable::getFullStr()
         out += "_{" + this->subscript + "}";
     }
     return out;
+}
+
+
+bool Variable::equals(std::shared_ptr<Token> other)
+{
+    if (other->getType() != TokenType::VARIABLE)
+    {
+        return false;
+    }
+    auto otherVar = std::dynamic_pointer_cast<Variable>(other);
+    bool same = (this->getStr() == otherVar->getStr());
+    if (same)
+    {
+        same = (this->getSubscript() == otherVar->getSubscript());
+    }
+    return same;
+}
+
+bool Number::equals(int other)
+{
+    
+    if (this->isInt())
+    {
+        return other == this->getInt();
+    }
+    else
+    {
+        return (other * 1.0) == this->getDouble();
+    }
+}
+
+bool Number::equals(double other)
+{
+    
+    if (!this->isInt())
+    {
+        return other == this->getDouble();
+    }
+    else
+    {
+        return other == this->getInt() * 1.0;
+    }
 }

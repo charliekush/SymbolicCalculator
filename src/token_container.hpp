@@ -18,7 +18,8 @@ protected:
     void pushBack(std::shared_ptr<Token> token);
    
 public:
-    TokenContainer();
+    TokenContainer() = default;
+    TokenContainer(std::shared_ptr<TokenContainer> container);
     TokenContainer(std::vector<std::shared_ptr<Token>> input);
     
     virtual ~TokenContainer() = default;
@@ -28,7 +29,7 @@ public:
     int size();
     bool empty();
     void removeParens();
-    std::vector<std::shared_ptr<Token>> getVector();
+    std::vector<std::shared_ptr<Token>> getVector() const;
     
     std::string toString();
     

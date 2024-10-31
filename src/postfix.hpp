@@ -5,6 +5,7 @@
 #include "token_queue.hpp"
 #include "token_vector.hpp"
 #include "token_stack.hpp"
+#include "expression_node.hpp"
 
 #include <vector>
 #include <stack>

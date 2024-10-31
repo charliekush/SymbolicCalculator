@@ -82,10 +82,7 @@ TokenVector Tokenizer::tokenize()
         if (this->currentToken()->getType() == TokenType::FUNCTION)
         {
             this->handleFunction();
-        }
         
-        if (this->currentToken()->getType() == TokenType::FUNCTION)
-        {
             std::shared_ptr<Function> func =
                 std::dynamic_pointer_cast<Function>(this->currentToken());
             std::shared_ptr<TokenQueue> exponent = func->getExponent();
@@ -101,11 +98,7 @@ TokenVector Tokenizer::tokenize()
             }
         }
     }
-    for (this->tokensIdx = 0; this->tokensIdx < this->output.size();
-                                                    this->tokensIdx++)
-    {
-        this->nextImplicit();
-    }
+    this->nextImplicit(this->output);
     return this->output;
 }
 std::shared_ptr<Token> Tokenizer::currentToken()
@@ -185,7 +178,6 @@ void Tokenizer::parseExpression()
     {
         this->clearSubstr();
     }
-
 }
 void Tokenizer::handleUnary()
 {
@@ -251,7 +243,7 @@ Number Tokenizer::parseNumber()
             }
             else
             {
-                std::runtime_error("Multiple decimal points in number");
+                throw std::runtime_error("Multiple decimal points in number");
             }
         }
         this->getNext();
@@ -412,12 +404,12 @@ void Tokenizer::handleFunction()
                     std::string errorMsg =
                         "Only log function can have subscript, not \"" +
                         func->getStr() + "\"!";
-                    std::runtime_error(errorMsg.c_str());
+                    throw std::runtime_error(errorMsg.c_str());
                 }
                 int underscoreIdx = this->tokensIdx++;
                 if (this->tokensIdx == this->output.size())
                 {
-                    std::runtime_error("No subscript found!");
+                    throw std::runtime_error("No subscript found!");
                     return;
                 }
                 subScript = this->getSubTokens();
@@ -430,7 +422,7 @@ void Tokenizer::handleFunction()
                 }
                 else
                 {
-                    std::runtime_error(
+                    throw std::runtime_error(
                         "Bad subscript! logarithm must have numeric base");
                 }
 
@@ -446,7 +438,7 @@ void Tokenizer::handleFunction()
                 exponent = this->getSubTokens();
                 if (exponent->size() == 0)
                 {
-                    std::runtime_error("No exponent found!");
+                    throw std::runtime_error("No exponent found!");
                 }
                 func->setExponent(exponent);
                 this->output.erase(exponentIdx, this->tokensIdx + 1);
@@ -489,8 +481,11 @@ std::shared_ptr<TokenQueue> Tokenizer::getSubTokens()
         std::shared_ptr<Token>& token = this->output[this->tokensIdx];
 
         // Push current token to the subexpression
+        if (token->getType() == TokenType::FUNCTION)
+        {
+            this->handleFunction();
+        }
         subExpr->push(token);
-
         // Check for left parenthesis and increment the count
         if (token->getType() == TokenType::LEFTPAREN)
         {
@@ -545,7 +540,8 @@ void Tokenizer::fixEulers()
         this->output.emplace_back(std::make_shared<Number>("1", 1));
         this->output.emplace_back(std::make_shared<RightParenthesis>());
     }
-    else if (!(this->output[this->tokensIdx + 1]->getType() == TokenType::OPERATOR
+    else if (
+        !(this->output[this->tokensIdx + 1]->getType() == TokenType::OPERATOR
         && this->output[this->tokensIdx + 1]->getStr() != "^"))
     {
         auto itr = this->tokensIdx + 1;
@@ -559,44 +555,41 @@ void Tokenizer::fixEulers()
 }
 
 
-void Tokenizer::nextImplicit()
+void Tokenizer::nextImplicit(TokenVector& vec)
 {
-
-    if (this->tokensIdx + 1 < this->output.size())
+    int implicitIdx = 0;
+    for (; implicitIdx < vec.size(); implicitIdx++)
     {
-        
-        TokenType currentType = this->currentToken()->getType();
-        TokenType nextType = this->output[this->tokensIdx + 1]->getType();
+        auto token = vec[implicitIdx];
+        TokenType currentType = token->getType();
+
+        if (currentType == TokenType::FUNCTION)
+        {
+            auto func = std::dynamic_pointer_cast<Function>(token);
+            TokenVector vec(func->getSubExpr());
+            this->nextImplicit(vec);
+            
+
+            func->setSubExpr(std::make_shared<TokenQueue>(vec));
+            vec[implicitIdx] = func;
+
+        }
+        if (implicitIdx + 1 >= vec.size())
+        {
+            break;
+        }
+        TokenType nextType = vec[implicitIdx + 1]->getType();
         if (Lookup::implicitMultiplication.find(
             {currentType, nextType })
                 != Lookup::implicitMultiplication.end())
         {
             if (Lookup::implicitMultiplication[{currentType, nextType}])
             {
-                this->output.emplace(this->tokensIdx + 1,
+                vec.emplace(implicitIdx + 1,
                                     std::make_shared<Operator>("*"));
             }
         }
-        else
-        {
-            try
-            {
-                std::string msg = "Types " +
-                    Lookup::getTokenType(this->currentToken()->getType()) +
-                    " and " +
-                    Lookup::getTokenType(nextType) +
-                    " should not be next to each other. Found at " +
-                    this->currentToken()->getFullStr() +
-                    " and " +
-                    this->output[this->tokensIdx + 1]->getFullStr() + "\n";
-
-            }
-            catch (const std::exception& e)
-            {
-                std::cerr << e.what() << '\n';
-            }
-
-        }
+        
     }
 
 

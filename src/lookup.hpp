@@ -9,10 +9,12 @@
 #ifndef __LOOKUP_HPP__
 #define __LOOKUP_HPP__
 #include "token.hpp"
+#include "function_defs.hpp"
 
 #include <unordered_map>
 
-struct PairHash {
+struct PairHash
+{
     template <class T1, class T2>
     std::size_t operator() (const std::pair<T1, T2>& pair) const
     {
@@ -22,18 +24,19 @@ struct PairHash {
 
 /**
  * @brief class that contains lookup tables and methods to access them
- * 
+ *
  */
 class Lookup
 {
 public:
-    static std::unordered_map<std::pair<TokenType,TokenType>, bool, PairHash> 
-                            implicitMultiplication;
-
+    static std::unordered_map<std::pair<TokenType, TokenType>, bool, PairHash>
+        implicitMultiplication;
+    static std::unordered_map<std::string, std::shared_ptr<FunctionDefinition>>
+        functionLookup;
     static std::unordered_map<std::string,
-                std::pair<TokenType, SymbolProperties>> symbolTable;
+        std::pair<TokenType, SymbolProperties>> symbolTable;
     static std::string getTokenType(TokenType type);
-    
+
 };
 
 

@@ -19,7 +19,7 @@
 // Forward declarations 
 class TokenVector; 
 class TokenQueue;
-class ExpressionTree;
+class ExpressionNode;
 
 enum class TokenType
 {
@@ -194,6 +194,7 @@ public:
     void setSubscript(std::string substr);
     std::string getSubscript();
     std::string getFullStr() override;
+    bool equals(std::shared_ptr<Token> other);
 };
 
 /**
@@ -246,6 +247,9 @@ public:
      */
     void flipSign();
 
+    bool equals(int other);
+    bool equals(double other);
+
     
 
 
@@ -256,12 +260,11 @@ public:
 class Function : public Token
 {
 private:
-    //!< Properties of the function
-    SymbolProperties properties; 
+    
     //! Token queue for function input
     std::shared_ptr<TokenQueue> subExpr;
     //! expression tree for function input
-    std::shared_ptr<ExpressionTree> subExprTree;
+    std::shared_ptr<ExpressionNode> subExprTree;
     //! TokenQueue for exponent
     std::shared_ptr<TokenQueue> exponent;
     
@@ -277,15 +280,14 @@ public:
     void setSubscript(std::shared_ptr<Number> base);
 
     void setSubExpr(std::shared_ptr<TokenQueue> queue);
-    void setSubExprTree(std::shared_ptr<ExpressionTree> tree);
-
+    void setSubExprTree(std::shared_ptr<ExpressionNode> root);
     void setExponent(std::shared_ptr<TokenQueue> queue);
     
     std::shared_ptr<Number> getSubscript();
     std::shared_ptr<TokenQueue> getExponent();
     
     std::shared_ptr<TokenQueue> getSubExpr();
-    std::shared_ptr<ExpressionTree> getSubExprTree();
+    std::shared_ptr<ExpressionNode> getSubExprTree();
     std::string getFullStr() override;
 
     
