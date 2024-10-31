@@ -30,12 +30,7 @@ public:
      */
     ExpressionNode(std::shared_ptr<Token> token);
 
-    /**
-     * @brief Constructs a tree from a postfix input
-     *
-     * @param token The token that the node represents.
-     */
-    ExpressionNode(TokenQueue queue);
+    
 
     /**
      * @brief creates expression tree from a postfix input
@@ -61,12 +56,10 @@ public:
     /**
      * @brief Sets the left child of this node.
      *
-     * @details If the left child is currently null, the provided node is set
-     * as the left child.
+     * @details Sets the provided node as the left child.
      *
      * @param node A shared pointer to the node to set as the left child.
      * @return A shared pointer to the newly set left child.
-     * @return nullptr if a left child already exists.
      */
     std::shared_ptr<ExpressionNode> setLeft(
                             std::shared_ptr<ExpressionNode> node);
@@ -74,12 +67,10 @@ public:
     /**
      * @brief Sets the right child of this node.
      *
-     * @details If the right child is currently null, the provided node is set
-     * as the right child.
+     * @details Sets the provided node as the right child.
      *
      * @param node A shared pointer to the node to set as the right child.
      * @return A shared pointer to the newly set right child.
-     * @return nullptr if a right child already exists.
      */
     std::shared_ptr<ExpressionNode> setRight(
                             std::shared_ptr<ExpressionNode> node);
@@ -218,15 +209,42 @@ public:
      * @return false otherwise
      */
     bool isLeaf();
-    void replaceWithRightChild();
-    void replaceWithLeftChild();
+    
+    /**
+     * @brief Get the fullStr of the token.
+     * 
+     * @return std::string 
+     */
     std::string getFullStr();
-    static std::vector<std::shared_ptr<ExpressionNode>>
-        getLeaves(std::shared_ptr<ExpressionNode>& root);
+    
+    /**
+     * @brief deep copy of subtree
+     * 
+     *
+     * @return root of the copied tree
+     */
     std::shared_ptr<ExpressionNode> copyTree();
+    /**
+     * @brief deep copy of node
+     * 
+     *
+     * @return the copied node
+     */
     void copyNode(std::shared_ptr<ExpressionNode> src);
+    /**
+     * @brief prints horizontal tree
+     * 
+     * @param depth indentation level
+     */
     void printTree(int depth = 0);
+    /**
+     * @brief prints function within tree
+     * 
+     * @param func 
+     * @param depth 
+     */
     void printFuncTree(std::shared_ptr<Function> func, int depth);
+    
 protected:
     std::shared_ptr<Token> token;
     std::weak_ptr<ExpressionNode> parent;
@@ -234,8 +252,6 @@ protected:
     std::shared_ptr<ExpressionNode> rightChild;
     std::shared_ptr<ExpressionNode> derivative;
     
-    static void getLeavesHelper(std::shared_ptr<ExpressionNode> node,
-                std::vector<std::shared_ptr<ExpressionNode>>& leaves);
     
     
 }; 

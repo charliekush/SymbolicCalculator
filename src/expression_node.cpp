@@ -88,6 +88,7 @@ void ExpressionNode::setToken(std::shared_ptr<Token> token)
 {
     this->token = token;
 }
+
 /**
  * @brief Gets the token represented by this node.
  *
@@ -323,39 +324,6 @@ bool ExpressionNode::isLeaf()
 
 
 
-
-
-/**
- * @brief gets all the leaves in the expression tree
- *
- * @param root the node to start from
- * @return shared pointers to the leaves of the tree
- */
-std::vector<std::shared_ptr<ExpressionNode>>
-    ExpressionNode::getLeaves(std::shared_ptr<ExpressionNode>& root)
-{
-    std::vector<std::shared_ptr<ExpressionNode>> leaves;
-    getLeavesHelper(root, leaves);
-    return leaves;
-}
-void ExpressionNode::getLeavesHelper(std::shared_ptr<ExpressionNode> node,
-                std::vector<std::shared_ptr<ExpressionNode>>& leaves) {
-    if (!node)
-    {
-        return;
-    }
-
-    // If the node is a leaf (no children), add it to the list
-    if (!node->getLeft() && !node->getRight())
-    {
-        leaves.emplace_back(node);
-        return;
-    }
-
-    // Recursively gather leaves from the left and right subtrees
-    getLeavesHelper(node->getLeft(), leaves);
-    getLeavesHelper(node->getRight(), leaves);
-}
 
 
 std::string ExpressionNode::getFullStr()
