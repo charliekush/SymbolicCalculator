@@ -16,9 +16,11 @@
 #include <cfloat>
 #include <stdexcept>
 
-#ifndef TEST_VERSION
-#define TEST_VERSION 0
+#ifdef TEST_VERSION
+#undef TEST_VERSION
 #endif // !TEST_VERSION
+
+#define TEST_VERSION 1
 
 
 struct Options
@@ -129,30 +131,43 @@ int main(int argc, char const* argv[])
 {
 
 
-    // Set it to false
+    
     Arithmetic::floatSimplification = false;
 
 
-    //std::string input = "ln(exp(x)-2*(2*x+3)/(5*x^2+x+4))";
+    //std::string input =;
 
+    std::string input;
+    std::string wrt;
+    std::string test_expr;
+    double value;
+    std::vector<double> values;
 
+    #if TEST_VERSION
+        //input = "ln(exp(x)-2*(2*x+3)/(5*x^2+x+4))";
+        input = "x(ln(x)-1)";
+        wrt = "x";
+        test_expr = "";
+        values = {"1.0","-1.0"};
+    #else
     std::vector<std::string> args(argv, argv + argc);
     Options options;
 
     try
     {
         options = parseArguments(args);
-
     }
     catch (const std::invalid_argument& e)
     {
         std::cerr << "Error: " << e.what() << "\n";
         return 1;
     }
-    std::string input = options.function;
-    std::string wrt = options.variable;
-    std::string test_expr = options.test;
-    double value = options.approximateValue;
+    input = options.function;
+    wrt = options.variable;
+    test_expr = options.test;
+    value = options.approximateValue;
+    values.emplace_back(value);
+    #endif // TEST_VERSION
 
     
     Logger log(false);
@@ -160,11 +175,14 @@ int main(int argc, char const* argv[])
 
     Approx approximator(input, wrt, value);
 
-    if (value != DBL_MAX)
+    for (const double& v : values)
     {
-        auto var = std::make_shared<Variable>(wrt);
-        double outValue = Approx::approximate(derivative, var, value);
-        log.logApprox(value,outValue);
+        if (v != DBL_MAX)
+        {
+            auto var = std::make_shared<Variable>(wrt);
+            double outValue = Approx::approximate(derivative, var, v);
+            log.logApprox(v,outValue);
+        }
     }
     if (test_expr != "")
     {
