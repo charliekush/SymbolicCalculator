@@ -3,6 +3,7 @@
 #include "operation.hpp"
 
 #include <cmath>
+#include <stdexcept>
 
 FunctionDefinition::FunctionDefinition(std::shared_ptr<ExpressionNode> node)
     : node(node){}
@@ -130,6 +131,12 @@ std::shared_ptr<ExpressionNode> Ln::getDerivative()
 
 double Ln::evaluate(double arg)
 {
+    if (arg <= 0.0)
+    {
+        std::string msg = "undefined operation: ln(" +
+                                                std::to_string(arg) + ")";
+        throw std::runtime_error(msg.c_str());
+    }
     return std::log(arg);
 }
 

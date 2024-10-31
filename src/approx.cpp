@@ -83,7 +83,6 @@ double Approx::approximate(nodePtr root, std::shared_ptr<Variable> wrt,
                                                                 double value)
 {
     auto rootCopy = root->copyTree();
-    auto leaves = ExpressionNode::getLeaves(rootCopy);
     std::stack<nodePtr> stack;
     nodePtr current = rootCopy;
     while (current != nullptr || !stack.empty()) {
@@ -104,7 +103,16 @@ double Approx::approximate(nodePtr root, std::shared_ptr<Variable> wrt,
     
     bool tempBool = Arithmetic::floatSimplification;
     Arithmetic::floatSimplification = true;
-    TreeFixer::simplify(rootCopy);
+    try
+    {
+        TreeFixer::simplify(rootCopy);
+    }
+    catch(const std::exception& e)
+    {
+        std::cerr << e.what() << '\n';
+        return DBL_MAX;
+    }
+    
     Arithmetic::floatSimplification = tempBool;
     if (rootCopy->getType() != TokenType::NUMBER)
     {

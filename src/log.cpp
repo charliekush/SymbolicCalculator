@@ -3,6 +3,7 @@
 #include "text_converter.hpp"
 
 #include <stack>
+#include <cfloat>
 Logger::Logger(bool useLaTeX)
 {
     if (useLaTeX)
@@ -242,11 +243,18 @@ std::string Logger::out()
     {
         this->addLine("approximations",false);
         this->addBrace("[");
-        for (int i = 0; i < tests.size(); i++)
+        for (int i = 0; i < approximations.size(); i++)
         {
             this->outStr += this->indent() + 
-                std::to_string(approximations[i].first) + ": " + 
-                 std::to_string(approximations[i].second) ;
+                std::to_string(approximations[i].first) + ": ";
+            if (approximations[i].second == DBL_MAX)
+            {
+                this->outStr += "undefined";
+            }
+            else
+            {
+                this->outStr += std::to_string(approximations[i].second);
+            }
             if ((i + 1) != approximations.size())
             {
                 this->outStr += ",";
