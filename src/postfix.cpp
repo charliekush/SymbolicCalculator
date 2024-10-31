@@ -38,7 +38,9 @@ void ShuntingYard::convert(TokenVector expression)
             auto subExpr =
                 std::make_shared<TokenQueue>(postfixInput.getPostfix());
             func->setSubExpr(subExpr);
-            operators.push(this->currentToken);
+
+            // Push function onto the operator stack (but treat it with high precedence)
+            output.push(this->currentToken);
         }
         else if (this->currentType() == TokenType::OPERATOR)
         {
@@ -55,29 +57,29 @@ void ShuntingYard::convert(TokenVector expression)
                 if (operators.size() == 0)
                 {
                     throw std::runtime_error("Mismatched parentheses");
-                    
                 }
                 this->popToOutput();
             }
             if (operators.size() == 0)
             {
                 throw std::runtime_error("Mismatched parentheses");
-                
             }
-            operators.pop();
-            if (operators.size() > 0 &&
-                this->currentType() == TokenType::FUNCTION)
+            operators.pop(); // Pop the left parenthesis
+
+            // Check if there's a function on top of the stack and pop it
+            if (!operators.empty() && operators.top()->getType() == TokenType::FUNCTION)
             {
-                this->popToOutput();
+                this->popToOutput(); // Pop the function (e.g., exp)
             }
         }
     }
-    while (operators.size() > 0)
+
+    // Pop all remaining operators to the output
+    while (!operators.empty())
     {
         if (operators.top()->getType() == TokenType::LEFTPAREN)
         {
             throw std::runtime_error("Mismatched parentheses");
-            
         }
         this->popToOutput();
     }
