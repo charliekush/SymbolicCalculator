@@ -260,8 +260,7 @@ public:
 class Function : public Token
 {
 private:
-    //!< Properties of the function
-    SymbolProperties properties; 
+    
     //! Token queue for function input
     std::shared_ptr<TokenQueue> subExpr;
     //! expression tree for function input
