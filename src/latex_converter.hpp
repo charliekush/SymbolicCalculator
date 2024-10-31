@@ -17,6 +17,7 @@ private:
 
     // Function to handle LaTeX formatting for functions like sin, cos, etc.
     static std::string functionToLaTeX(std::shared_ptr<ExpressionNode> node);
+    static std::string parens(std::string str);
 };
 
 #endif // __LATEX_CONVERTER_HPP__

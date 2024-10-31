@@ -30,31 +30,31 @@ std::string LaTeXConverter::nodeToLaTeX(std::shared_ptr<ExpressionNode> node)
         std::stringstream latex;
         if (op == "+")
         {
-            latex << nodeToLaTeX(node->getLeft()) 
+            latex << parens(nodeToLaTeX(node->getLeft())) 
                     << " + " 
-                    << nodeToLaTeX(node->getRight());
+                    << parens(nodeToLaTeX(node->getRight()));
         }
         else if (op == "-")
         {
-            latex << nodeToLaTeX(node->getLeft()) 
+            latex <<  parens(nodeToLaTeX(node->getLeft())) 
                     << " - " 
-                    << nodeToLaTeX(node->getRight());
+                    << parens(nodeToLaTeX(node->getRight()));
         }
         else if (op == "*") 
         {
-            latex << nodeToLaTeX(node->getLeft()) 
+            latex << parens(nodeToLaTeX(node->getLeft())) 
                     << " \\cdot " 
-                    << nodeToLaTeX(node->getRight());
+                    << parens(nodeToLaTeX(node->getRight())) ;
         }
         else if (op == "/")
         {
-            latex << "\\dfrac{" << nodeToLaTeX(node->getLeft()) << "}"
-                    << "{" << nodeToLaTeX(node->getRight()) << "}";
+            latex << "\\dfrac{" << parens(nodeToLaTeX(node->getLeft())) << "}"
+                    << "{" << parens(nodeToLaTeX(node->getRight())) << "}";
         }
         else if (op == "^")  
         {
-            latex << nodeToLaTeX(node->getLeft()) 
-                    << "^{" << nodeToLaTeX(node->getRight()) << "}";
+            latex << parens(nodeToLaTeX(node->getLeft())) 
+                    << "^{" << parens(nodeToLaTeX(node->getRight())) << "}";
         }
         out =  latex.str();
     }
@@ -67,7 +67,7 @@ std::string LaTeXConverter::nodeToLaTeX(std::shared_ptr<ExpressionNode> node)
         out = "{" + node->getFullStr() + "}";
         out =  "{" + node->getFullStr() + "}";
     }
-    std::cout << "Found " << out << "\n";
+    //std::cout << "Found " << out << "\n";
     return out;
 }
 
@@ -96,7 +96,7 @@ std::string LaTeXConverter::functionToLaTeX(std::shared_ptr<ExpressionNode>
     else if (funcName == "sec")
         latexFunc = "\\sec";
     else if (funcName == "exp")
-        latexFunc = "\\exp";
+        latexFunc = "\e^";
     else if (funcName == "ln")
         latexFunc = "\\ln";
     else if (funcName == "sqrt")
@@ -117,4 +117,10 @@ std::string LaTeXConverter::functionToLaTeX(std::shared_ptr<ExpressionNode>
     // Function's argument inside \left( and \right)
     std::string argument = nodeToLaTeX(token->getSubExprTree());
     return latexFunc + "\\left(" + argument + "\\right)";
+}
+
+
+std::string LaTeXConverter::parens(std::string str)
+{
+    return "\\left(" + str + "\\right)";
 }
