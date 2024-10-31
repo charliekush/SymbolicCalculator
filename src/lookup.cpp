@@ -2,24 +2,26 @@
 
 std::unordered_map<std::string, std::pair<TokenType, SymbolProperties>> 
     Lookup::symbolTable = {
-    {"+", {TokenType::OPERATOR, {1, Associativity::LEFT, true}}},
-    {"-", {TokenType::OPERATOR, {1, Associativity::LEFT, false}}},
-    {"*", {TokenType::OPERATOR, {2, Associativity::LEFT, true}}},
-    {"/", {TokenType::OPERATOR, {2, Associativity::LEFT, false}}},
-    {"^", {TokenType::OPERATOR, {3, Associativity::RIGHT, false}}},
-    {"sin", {TokenType::FUNCTION, {4, Associativity::NONE, false}}},
-    {"cos", {TokenType::FUNCTION, {4, Associativity::NONE, false}}},
-    {"tan", {TokenType::FUNCTION, {4, Associativity::NONE, false}}},
-    {"cot", {TokenType::FUNCTION, {4, Associativity::NONE, false}}},
-    {"csc", {TokenType::FUNCTION, {4, Associativity::NONE, false}}},
-    {"sec", {TokenType::FUNCTION, {4, Associativity::NONE, false}}},
-    {"exp", {TokenType::FUNCTION, {4, Associativity::NONE, false}}},
-    {"ln", {TokenType::FUNCTION, {5, Associativity::NONE, false}}},
-    {"log", {TokenType::FUNCTION, {5, Associativity::NONE, false}}},
-    {"sqrt", {TokenType::FUNCTION, {5, Associativity::NONE, false}}},
-    {"(", {TokenType::LEFTPAREN, {5, Associativity::NONE, false}}},
-    {")", {TokenType::RIGHTPAREN, {5, Associativity::NONE, false}}},
-    {"_", {TokenType::UNDERSCORE, {5, Associativity::NONE, false}}}
+    {"sin", {TokenType::FUNCTION, {2, Associativity::NONE, false}}},
+    {"cos", {TokenType::FUNCTION, {2, Associativity::NONE, false}}},
+    {"tan", {TokenType::FUNCTION, {2, Associativity::NONE, false}}},
+    {"cot", {TokenType::FUNCTION, {2, Associativity::NONE, false}}},
+    {"csc", {TokenType::FUNCTION, {2, Associativity::NONE, false}}},
+    {"sec", {TokenType::FUNCTION, {2, Associativity::NONE, false}}},
+    {"exp", {TokenType::FUNCTION, {2, Associativity::NONE, false}}},
+    {"ln", {TokenType::FUNCTION, {2, Associativity::NONE, false}}},
+    {"log", {TokenType::FUNCTION, {2, Associativity::NONE, false}}},
+    {"sqrt", {TokenType::FUNCTION, {2, Associativity::NONE, false}}},
+    
+    {"+", {TokenType::OPERATOR, {10, Associativity::LEFT, true}}},
+    {"-", {TokenType::OPERATOR, {10, Associativity::LEFT, false}}},
+    {"*", {TokenType::OPERATOR, {11, Associativity::LEFT, true}}},
+    {"/", {TokenType::OPERATOR, {11, Associativity::LEFT, false}}},
+    {"^", {TokenType::OPERATOR, {12, Associativity::RIGHT, false}}},
+    
+    {"(", {TokenType::LEFTPAREN, {20, Associativity::NONE, false}}},
+    {")", {TokenType::RIGHTPAREN, {20, Associativity::NONE, false}}},
+    {"_", {TokenType::UNDERSCORE, {20, Associativity::NONE, false}}}
 };
 std::unordered_map<std::pair<TokenType,TokenType>, bool, PairHash> 
     Lookup::implicitMultiplication = {
