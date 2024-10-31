@@ -7,6 +7,7 @@
 
 #include <iostream>
 #include <cmath>
+#include <stdexcept>
 
 
 
@@ -153,17 +154,20 @@ std::shared_ptr<ExpressionNode> TreeFixer::simplify(nodePtr node)
                 auto arg = std::dynamic_pointer_cast<Number>(
                                             newSubRoot->getToken());
                 double result;
+                double argNum;
                 //std::cout << funcToken->getStr() << "(";
                 if (arg->isInt())
                 {
-                    result = func->evaluate(arg->getInt() * 1.0);
+                    argNum = arg->getInt() * 1.0;
                     //std::cout << arg->getInt() * 1.0 << ")";
                 }
                 else
                 {
-                    result = func->evaluate(arg->getDouble());
+                    argNum = arg->getDouble();
                     //std::cout << arg->getDouble() << ")";
                 }
+                result = func->evaluate(argNum);
+                
                 //std::cout << " = " << result << "\n";
                 if (std::fmod(result, 1) == 0 || 
                             Arithmetic::floatSimplification)
