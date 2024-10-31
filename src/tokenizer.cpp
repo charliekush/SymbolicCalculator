@@ -557,8 +557,10 @@ void Tokenizer::fixEulers()
 
 void Tokenizer::nextImplicit(TokenVector& vec)
 {
+    
     int implicitIdx = 0;
-    for (; implicitIdx < vec.size(); implicitIdx++)
+
+    while (implicitIdx < vec.size())
     {
         auto token = vec[implicitIdx];
         TokenType currentType = token->getType();
@@ -566,11 +568,11 @@ void Tokenizer::nextImplicit(TokenVector& vec)
         if (currentType == TokenType::FUNCTION)
         {
             auto func = std::dynamic_pointer_cast<Function>(token);
-            TokenVector vec(func->getSubExpr());
-            this->nextImplicit(vec);
+            TokenVector subVec(func->getSubExpr());
+            this->nextImplicit(subVec);
             
 
-            func->setSubExpr(std::make_shared<TokenQueue>(vec));
+            func->setSubExpr(std::make_shared<TokenQueue>(subVec));
             vec[implicitIdx] = func;
 
         }
@@ -589,6 +591,7 @@ void Tokenizer::nextImplicit(TokenVector& vec)
                                     std::make_shared<Operator>("*"));
             }
         }
+        implicitIdx++;
         
     }
 
