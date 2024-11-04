@@ -14,6 +14,7 @@
 #include "token_queue.hpp"
 
 #include <stdexcept>
+#include <cstdlib>
 
  /**
   * @brief Constructs a Token with specified type and string.
@@ -291,7 +292,7 @@ bool Number::isDouble() const
  */
 int Number::getInt() const
 {
-    int out = std::get<int>(value);
+    int out = std::abs(std::get<int>(value));
     if (this->isNegative())
     {
         out *= -1;
@@ -306,7 +307,7 @@ int Number::getInt() const
  */
 double Number::getDouble() const
 {
-    double out = std::get<double>(value);
+    double out = std::abs(std::get<double>(value));
     if (this->isNegative())
     {
         out *= -1.0;
@@ -369,7 +370,8 @@ bool Number::equals(int other)
     
     if (this->isInt())
     {
-        return other == this->getInt();
+        return (other == this->getInt()) && 
+            ((other < 0) == this->isNegative());
     }
     else
     {

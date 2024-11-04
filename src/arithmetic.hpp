@@ -22,7 +22,7 @@ public:
     static numPtr divide(nodePtr operatorNode, numPtr left, numPtr right);
     static numPtr add(nodePtr operatorNode, numPtr left, numPtr right);
     static numPtr subtract(nodePtr operatorNode, numPtr left, numPtr right);
-    static void simplify(nodePtr operatorNode, numPtr left, numPtr right);
+    static void simplify(nodePtr operatorNode);
     
     static void simplifyExponent(nodePtr& operatorNode);
     static void simplifyMultiplication(nodePtr& operatorNode);

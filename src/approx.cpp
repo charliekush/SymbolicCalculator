@@ -13,9 +13,9 @@
 #include <stack>
 
 
-Approx::Approx(std::string raw_input, std::string diffVar, double value)
+Approx::Approx(std::string raw_input, std::string diffVar)
 {
-    this->value = value;
+    
     this->diffVar = std::make_shared<Variable>(diffVar);
     Tokenizer parser(raw_input);
     auto parsed = parser.tokenize();
@@ -25,14 +25,14 @@ Approx::Approx(std::string raw_input, std::string diffVar, double value)
 
     this->derivative = Derivative(raw_input,"x").solve();
 }
-std::pair<double,double> Approx::approximate()
+std::pair<double,double> Approx::approximate(double value)
 {
     
     
-    double originalApprox = approximate(this->root, this->diffVar, this->value);
+    double originalApprox = approximate(this->root, this->diffVar, value);
     
-    double derivativeApprox = approximate(this->derivative, this->diffVar, 
-                                                                this->value);
+    double derivativeApprox = approximate(this->derivative, 
+        this->diffVar, value);
     return std::make_pair(originalApprox, derivativeApprox);
 }
 std::shared_ptr<Token> Approx::replaceToken(nodePtr node, 
@@ -61,10 +61,10 @@ std::shared_ptr<Token> Approx::replaceToken(nodePtr node,
     else if (node->getType() == TokenType::FUNCTION)
     {
         auto func = std::dynamic_pointer_cast<Function>(node->getToken());
-        auto subExpr = func->getSubExprTree();
+        auto subExpr = func->getSubExprTree()->copyTree();
         auto funcIter = Lookup::functionLookup.find(node->getStr());
         
-        auto subApprox = approximate(subExpr, wrt, value);
+        double subApprox = approximate(subExpr, wrt, value);
         if (subApprox == DBL_MAX)
         {
             func->getSubExprTree()->printTree();
@@ -72,8 +72,9 @@ std::shared_ptr<Token> Approx::replaceToken(nodePtr node,
         }
         auto newSubRoot = std::make_shared<Number>(std::to_string(subApprox),
                                                     subApprox);
-        func->setSubExprTree(std::make_shared<ExpressionNode>(newSubRoot));
-        outToken = func;
+        auto newFunc = std::make_shared<Function>(func->getStr());
+        newFunc->setSubExprTree(std::make_shared<ExpressionNode>(newSubRoot));
+        outToken = newFunc;
 
         
     }
@@ -83,6 +84,7 @@ double Approx::approximate(nodePtr root, std::shared_ptr<Variable> wrt,
                                                                 double value)
 {
     auto rootCopy = root->copyTree();
+    std::cout << "Approximating: " << TextConverter::convertToText(rootCopy) << "\n";
     std::stack<nodePtr> stack;
     nodePtr current = rootCopy;
     while (current != nullptr || !stack.empty()) {
@@ -103,6 +105,7 @@ double Approx::approximate(nodePtr root, std::shared_ptr<Variable> wrt,
     
     bool tempBool = Arithmetic::floatSimplification;
     Arithmetic::floatSimplification = true;
+    std::cout << "To simplify: " << TextConverter::convertToText(rootCopy) << "\n";
     try
     {
         TreeFixer::simplify(rootCopy);

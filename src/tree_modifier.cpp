@@ -84,8 +84,4 @@ void TreeModifier::replaceWithRightChild(nodePtr& node) {
     node->setDerivative(right->getDerivative());
     node->setLeft(right->getLeft());
     node->setRight(right->getRight());
-    
-    
-
-    
 }

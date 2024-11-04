@@ -4,6 +4,7 @@
 
 #include <cmath>
 #include <iostream>
+#include "tree_fixer.hpp"
 
 
 bool Arithmetic::floatSimplification = true;
@@ -11,6 +12,7 @@ bool Arithmetic::floatSimplification = true;
 std::shared_ptr<Number> Arithmetic::performOperation(const operation& op,
                             numPtr left, numPtr right, bool isDivision = false)
 {
+    
     // Handle division separately
     if (isDivision)
     {
@@ -20,7 +22,7 @@ std::shared_ptr<Number> Arithmetic::performOperation(const operation& op,
             // If evenly divisible
             if (left->getInt() % right->getInt() == 0)
             {
-                int result = left->getInt() / right->getInt();
+                int result = (left->getInt()) / (right->getInt());
                 // return int
                 auto out = std::make_shared<Number>(std::to_string(result),
                                                                         result);
@@ -29,14 +31,14 @@ std::shared_ptr<Number> Arithmetic::performOperation(const operation& op,
             }
             else
             {
-                
+
                 double result = static_cast<double>(left->getInt()) /
-                    right->getInt();
+                    ( right->getInt());
                 // Return a float
                 auto out = std::make_shared<Number>(std::to_string(result),
                                                                     result);
                 out->setNegative(result < 0);
-                if (std::fmod(result, 1) != 0 && 
+                if (std::fmod(result, 1) != 0 &&
                                 !Arithmetic::floatSimplification)
                 {
                     return nullptr;
@@ -50,11 +52,12 @@ std::shared_ptr<Number> Arithmetic::performOperation(const operation& op,
     // Handle cases where both operands are integers for non-division operations
     if (left->isInt() && right->isInt())
     {
-        int result = static_cast<int>(op(left->getInt(), right->getInt()));
+        int result = static_cast<int>(op((left->getInt()), 
+                                                 right->getInt()));
         // Return an int
         auto out = std::make_shared<Number>(std::to_string(result), result);
         out->setNegative(result < 0);
-        
+
         return out;
 
 
@@ -64,15 +67,16 @@ std::shared_ptr<Number> Arithmetic::performOperation(const operation& op,
     double result;
     if (left->isInt() && right->isDouble())
     {
-        result = op(left->getInt(), right->getDouble());
+        result = op( left->getInt(),  right->getDouble());
     }
     else if (left->isDouble() && right->isInt())
     {
-        result = op(left->getDouble(), right->getInt());
+        result = op( left->getDouble(),  right->getInt());
     }
     else if (left->isDouble() && right->isDouble())
     {
-        result = op(left->getDouble(), right->getDouble());
+        result = op( left->getDouble(), 
+                         right->getDouble());
     }
     else
     {
@@ -80,7 +84,7 @@ std::shared_ptr<Number> Arithmetic::performOperation(const operation& op,
     }
 
     double floatPart = std::modf(result, &floatPart);
-    
+
     if (floatPart == 0.0)
     {
         auto out = std::make_shared<Number>(std::to_string((int)result),
@@ -168,7 +172,7 @@ void Arithmetic::setNodeToOne(nodePtr& operatorNode) {
         std::make_shared<Number>("0", 0)));
 }
 
-void Arithmetic::simplify(nodePtr node, numPtr left, numPtr right)
+void Arithmetic::simplify(nodePtr node)
 {
     if (node->getStr() == "^")
     {
@@ -201,13 +205,13 @@ void Arithmetic::simplifyExponent(nodePtr& operatorNode)
         auto value = Arithmetic::power(operatorNode, leftNum, rightNum);
         if (value)
         {
-            //std::cout << leftNum->getStr() << "^" << rightNum->getStr() << " = " << value->getStr() << "\n";
+            std::cout << leftNum->getFullStr() << "^" << rightNum->getFullStr() << " = " << value->getFullStr() << "\n";
             operatorNode->removeLeftChild();
             operatorNode->removeRightChild();
             operatorNode->setToken(value);
             operatorNode->setDerivative(std::make_shared<ExpressionNode>(
-            std::make_shared<Number>("0", 0)));
-            
+                std::make_shared<Number>("0", 0)));
+
             return;
         }
     }
@@ -247,18 +251,18 @@ void Arithmetic::simplifyMultiplication(nodePtr& operatorNode)
 {
     auto leftNum = getNumberToken(operatorNode->getLeft());
     auto rightNum = getNumberToken(operatorNode->getRight());
-    
+
     if (leftNum && rightNum)
     {
         auto value = Arithmetic::multiply(operatorNode, leftNum, rightNum);
         if (value)
         {
-            //std::cout << leftNum->getStr() << "*" << rightNum->getStr() << " = " << value->getStr() << "\n";
+            std::cout << leftNum->getFullStr() << "*" << rightNum->getFullStr() << " = " << value->getFullStr() << "\n";
             operatorNode->removeLeftChild();
             operatorNode->removeRightChild();
             operatorNode->setToken(value);
             operatorNode->setDerivative(std::make_shared<ExpressionNode>(
-            std::make_shared<Number>("0", 0)));
+                std::make_shared<Number>("0", 0)));
             return;
         }
     }
@@ -270,20 +274,43 @@ void Arithmetic::simplifyMultiplication(nodePtr& operatorNode)
         }
         else if (leftNum->equals(1))
         {
-       
+
             TreeModifier::replaceWithRightChild(operatorNode);
         }
     }
     else if (rightNum)
     {
         if (rightNum->equals(0))
-        {      
+        {
             setNodeToZero(operatorNode);
         }
         else if (rightNum->equals(1))
         {
             TreeModifier::replaceWithLeftChild(operatorNode);
         }
+    }
+
+    if (TreeFixer::treesEqual(operatorNode->getLeft(), operatorNode->getRight()))
+    {
+        operatorNode->setToken(std::make_shared<Operator>("^"));
+        operatorNode->setLeft(std::make_shared<ExpressionNode>(
+            std::make_shared<Number>("2", 2)));
+    }
+    if (operatorNode->getLeft()->getStr() == "^" &&
+                TreeFixer::treesEqual(operatorNode->getLeft()->getLeft(),
+                    operatorNode->getRight()))
+    {
+        operatorNode->swapChildren();
+        operatorNode->setRight(operatorNode->getRight()->getLeft());
+        Arithmetic::simplify(operatorNode->getRight());
+    }
+    if (operatorNode->getRight()->getStr() == "^" &&
+                TreeFixer::treesEqual(operatorNode->getRight()->getLeft(),
+                    operatorNode->getLeft()))
+    {
+       
+        operatorNode->setRight(operatorNode->getRight()->getRight());
+        Arithmetic::simplify(operatorNode->getRight());
     }
 }
 
@@ -297,12 +324,12 @@ void Arithmetic::simplifyDivision(nodePtr& operatorNode)
         auto value = Arithmetic::divide(operatorNode, leftNum, rightNum);
         if (value)
         {
-            //std::cout << leftNum->getStr() << "/" << rightNum->getStr() << " = " << value->getStr() << "\n";
+            std::cout << leftNum->getFullStr() << "/" << rightNum->getFullStr() << " = " << value->getFullStr() << "\n";
             operatorNode->removeLeftChild();
             operatorNode->removeRightChild();
             operatorNode->setToken(value);
             operatorNode->setDerivative(std::make_shared<ExpressionNode>(
-            std::make_shared<Number>("0", 0)));
+                std::make_shared<Number>("0", 0)));
             return;
         }
     }
@@ -336,12 +363,12 @@ void Arithmetic::simplifyAddition(nodePtr& operatorNode)
         auto value = Arithmetic::add(operatorNode, leftNum, rightNum);
         if (value)
         {
-            //std::cout << leftNum->getStr() << "+" << rightNum->getStr() << " = " << value->getStr() << "\n";
+            std::cout << leftNum->getFullStr() << "+" << rightNum->getFullStr() << " = " << value->getFullStr() << "\n";
             operatorNode->removeLeftChild();
             operatorNode->removeRightChild();
             operatorNode->setToken(value);
             operatorNode->setDerivative(std::make_shared<ExpressionNode>(
-            std::make_shared<Number>("0", 0)));
+                std::make_shared<Number>("0", 0)));
             return;
         }
     }
@@ -371,12 +398,12 @@ void Arithmetic::simplifySubtraction(nodePtr& operatorNode)
         auto value = Arithmetic::subtract(operatorNode, leftNum, rightNum);
         if (value)
         {
-            //std::cout << leftNum->getStr() << "-" << rightNum->getStr() << " = " << value->getStr() << "\n";
+            std::cout << leftNum->getFullStr() << "-" << rightNum->getFullStr() << " = " << value->getFullStr() << "\n";
             operatorNode->removeLeftChild();
             operatorNode->removeRightChild();
             operatorNode->setToken(value);
             operatorNode->setDerivative(std::make_shared<ExpressionNode>(
-            std::make_shared<Number>("0", 0)));
+                std::make_shared<Number>("0", 0)));
             return;
         }
     }

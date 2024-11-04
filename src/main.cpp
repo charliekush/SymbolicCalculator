@@ -148,7 +148,7 @@ int main(int argc, char const* argv[])
         input = "x(ln(x)-1)";
         wrt = "x";
         test_expr = "";
-        values = {"1.0","-1.0"};
+        values = {1.0,-2.0,3.0};
     #else
     std::vector<std::string> args(argv, argv + argc);
     Options options;
@@ -173,7 +173,7 @@ int main(int argc, char const* argv[])
     Logger log(false);
     auto derivative = getDerivative(log, input, wrt);
 
-    Approx approximator(input, wrt, value);
+    Approx approximator(input, wrt);
 
     for (const double& v : values)
     {
@@ -200,7 +200,6 @@ int main(int argc, char const* argv[])
             if (expected != actual)
             {
                 same = false;
-                
             }
         }
         

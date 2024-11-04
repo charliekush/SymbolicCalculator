@@ -188,3 +188,50 @@ std::shared_ptr<ExpressionNode> TreeFixer::simplify(nodePtr node)
     //std::cout << "Simplified: " << TextConverter::convertToText(node) << "\n";
     return node;
 }
+
+bool TreeFixer::treesEqual(const std::shared_ptr<ExpressionNode>& tree1, 
+                            const std::shared_ptr<ExpressionNode>& tree2)
+{
+    if (!tree1 && !tree2)
+    {
+        return true;
+    }
+    if (!tree1 || !tree2)
+    {
+        return false;
+    }
+    TokenType type1 = tree1->getType();
+    TokenType type2 = tree2->getType();
+
+    if (type1 != type2)
+    {
+        return false;
+    }
+    if (type1 == TokenType::FUNCTION)
+    {
+        auto func1 = std::dynamic_pointer_cast<Function>(tree1->getToken());
+        auto func2 = std::dynamic_pointer_cast<Function>(tree2->getToken());
+
+        if (func1->getStr() != func1->getStr())
+        {
+            return false;
+        }
+        if (func1->getSubscript() != func1->getSubscript())
+        {
+            return false;
+        }
+        return treesEqual(func1->getSubExprTree(), func2->getSubExprTree());
+    }
+    if (type1 == TokenType::VARIABLE)
+    {
+        auto var1 = std::dynamic_pointer_cast<Variable>(tree1->getToken());
+        auto var2 = std::dynamic_pointer_cast<Variable>(tree2->getToken());
+        return var1->equals(var2);
+    }
+    if (tree1->getStr() != tree2->getStr())
+    {
+        return false;
+    }
+    return treesEqual(tree1->getLeft(), tree2->getLeft()) &&
+           treesEqual(tree1->getRight(), tree2->getRight());
+}
