@@ -45,10 +45,6 @@ std::shared_ptr<ExpressionNode> Sin::getDerivative()
     return chain(derivative);
 }
 
-double Sin::evaluate(double arg)
-{
-    return std::sin(arg);
-}
 
 
 // d/dx cos(x) = -sin(x)
@@ -60,11 +56,6 @@ std::shared_ptr<ExpressionNode> Cos::getDerivative()
     
     
     return chain(derivative);
-}
-
-double Cos::evaluate(double arg)
-{
-    return std::cos(arg);
 }
 
 
@@ -79,10 +70,6 @@ std::shared_ptr<ExpressionNode> Tan::getDerivative()
     return chain(squared);
 }
 
-double Tan::evaluate(double arg)
-{
-    return std::tan(arg);
-}
 
 // d/dx sec(x) = sec(x)tan(x)
 std::shared_ptr<ExpressionNode> Sec::getDerivative()
@@ -101,23 +88,8 @@ std::shared_ptr<ExpressionNode> Sec::getDerivative()
     return chain(product);
 }
 
-double Sec::evaluate(double arg)
-{
-    return 1.0 / std::cos(arg);
-}
 
-// d/dx exp(x) = exp(x)
-std::shared_ptr<ExpressionNode> Exp::getDerivative()
-{
-    auto derivative = std::make_shared<Function>("exp");
-    derivative->setSubExprTree(this->subExpr);
-    return chain(derivative);
-}
 
-double Exp::evaluate(double arg)
-{
-    return std::exp(arg);
-}
 
 // d/dx ln(x) = 1/x
 std::shared_ptr<ExpressionNode> Ln::getDerivative()
@@ -129,16 +101,7 @@ std::shared_ptr<ExpressionNode> Ln::getDerivative()
     return derivative;
 }
 
-double Ln::evaluate(double arg)
-{
-    if (arg <= 0.0)
-    {
-        std::string msg = "undefined operation: ln(" +
-                                                std::to_string(arg) + ")";
-        throw std::runtime_error(msg.c_str());
-    }
-    return std::log(arg);
-}
+
 
 // d/dx log_a(x) = 1/x
 std::shared_ptr<ExpressionNode> Log::getDerivative()
@@ -175,20 +138,7 @@ std::shared_ptr<ExpressionNode> Cot::getDerivative()
     return chain(squared);
 }
 
-double Cot::evaluate(double arg)
-{
-    return 1.0 / std::tan(arg);
-}
 
-double Log::evaluate(double arg)
-{    
-    auto base = this->func->getSubscript();
-    if ( base->isDouble())
-    {
-    return std::log(arg) / std::log(base->getDouble());
-    }
-    return (std::log(arg) / std::log(1.0 * base->getInt()));
-}
 
 // d/dx csc(x) = -csc(x)cot(x)
 std::shared_ptr<ExpressionNode> Csc::getDerivative()
@@ -210,10 +160,6 @@ std::shared_ptr<ExpressionNode> Csc::getDerivative()
     return chain(product);
 }
 
-double Csc::evaluate(double arg)
-{
-    return 1.0 / std::sin(arg);
-}
 
 
 // d/dx sqrt(x) = 1 / (2 * sqrt(x))
@@ -239,7 +185,108 @@ std::shared_ptr<ExpressionNode> Sqrt::getDerivative()
     return chain(derivative);
 }
 
+
+double Sin::evaluate(double arg)
+{
+    return std::sin(arg); // No bounds checking required
+}
+
+double Cos::evaluate(double arg)
+{
+    return std::cos(arg); // No bounds checking required
+}
+
+double Tan::evaluate(double arg)
+{
+    if (std::fmod(arg, M_PI) == M_PI_2) // Check for odd multiples of π/2
+    {
+        throw std::runtime_error("undefined operation: tan(arg) is undefined at odd multiples of π/2");
+    }
+    return std::tan(arg);
+}
+
+double Sec::evaluate(double arg)
+{
+    double cosValue = std::cos(arg);
+    if (cosValue == 0.0) // Check for cos(arg) = 0
+    {
+        throw std::runtime_error("undefined operation: sec(arg) is undefined when cos(arg) is zero");
+    }
+    return 1.0 / cosValue;
+}
+
+double Exp::evaluate(double arg)
+{
+    if (std::isnan(arg))
+    {
+        throw std::invalid_argument("Input to exp cannot be NaN");
+    }
+
+    // Check for overflow threshold
+    if (arg > std::log(std::numeric_limits<double>::max()))
+    {
+        throw std::overflow_error("exp input too large, results in overflow");
+    }
+
+    // Check for underflow threshold
+    if (arg < std::log(std::numeric_limits<double>::min()))
+    {
+        return 0.0; // exp(arg) is effectively zero
+    }
+
+    return std::exp(arg);
+}
+
+double Ln::evaluate(double arg)
+{
+    if (arg <= 0.0) // Check for non-positive values
+    {
+        std::string msg = "undefined operation: ln(" + std::to_string(arg) + ")";
+        throw std::runtime_error(msg.c_str());
+    }
+    return std::log(arg);
+}
+
+double Cot::evaluate(double arg)
+{
+    double tanValue = std::tan(arg);
+    if (tanValue == 0.0) // Check for tan(arg) = 0
+    {
+        throw std::runtime_error("undefined operation: cot(arg) is undefined when tan(arg) is zero");
+    }
+    return 1.0 / tanValue;
+}
+
+double Log::evaluate(double arg)
+{
+    auto base = this->func->getSubscript();
+    double baseValue = base->isDouble() ? base->getDouble() : static_cast<double>(base->getInt());
+    if (baseValue <= 0.0 || baseValue == 1.0) // Check for invalid base
+    {
+        throw std::runtime_error("undefined operation: log base must be positive and not equal to 1");
+    }
+    if (arg <= 0.0) // Check for non-positive arg
+    {
+        throw std::runtime_error("undefined operation: log(arg) is undefined for non-positive values of arg");
+    }
+    return std::log(arg) / std::log(baseValue);
+}
+
+double Csc::evaluate(double arg)
+{
+    double sinValue = std::sin(arg);
+    if (sinValue == 0.0) // Check for sin(arg) = 0
+    {
+        throw std::runtime_error("undefined operation: csc(arg) is undefined when sin(arg) is zero");
+    }
+    return 1.0 / sinValue;
+}
+
 double Sqrt::evaluate(double arg)
 {
+    if (arg < 0.0) // Check for negative values
+    {
+        throw std::runtime_error("undefined operation: sqrt(arg) is undefined for negative values");
+    }
     return std::sqrt(arg);
 }
