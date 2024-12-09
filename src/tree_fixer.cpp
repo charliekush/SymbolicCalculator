@@ -86,6 +86,7 @@ void TreeFixer::checkChildren(nodePtr node)
 std::shared_ptr<ExpressionNode> TreeFixer::simplify(nodePtr node)
 {
     ////std::cout << "\ninput: " << TextConverter::convertToText(node) << "\n";
+    auto original = node->copyTree();
     auto left = node->getLeft();
     auto right = node->getRight();
     if (node->getType() == TokenType::OPERATOR)
@@ -145,9 +146,8 @@ std::shared_ptr<ExpressionNode> TreeFixer::simplify(nodePtr node)
         {
             auto func = funcIter->second;
 
-             
+            
             func->update(node);
-
             
             if (newSubRoot->getType() == TokenType::NUMBER)
             {
@@ -184,8 +184,10 @@ std::shared_ptr<ExpressionNode> TreeFixer::simplify(nodePtr node)
         }
         
     }
-    
-    //std::cout << "Simplified: " << TextConverter::convertToText(node) << "\n";
+    if (!TreeFixer::treesEqual(node, original))
+    {
+        node = simplify(node);
+    }
     return node;
 }
 

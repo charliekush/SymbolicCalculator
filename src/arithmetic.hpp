@@ -29,11 +29,13 @@ public:
     static void simplifyDivision(nodePtr& operatorNode);
     static void simplifyAddition(nodePtr& operatorNode);
     static void simplifySubtraction(nodePtr& operatorNode);
-
+    
     static numPtr getNumberToken(const nodePtr& node);
     static void setNodeToZero(nodePtr& operatorNode);
     static void setNodeToOne(nodePtr& operatorNode);
-
+    static nodePtr plusOne(nodePtr original);
+    static nodePtr minusOne(nodePtr original);
+    static nodePtr oneMinus(nodePtr original);
 };
 
 
