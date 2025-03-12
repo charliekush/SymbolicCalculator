@@ -1,12 +1,14 @@
 #include "token_container.hpp"
-TokenContainer::TokenContainer()
-{
-    this->container = std::vector<std::shared_ptr<Token>>();
-}
+
 TokenContainer::TokenContainer(std::vector<std::shared_ptr<Token>> input)
 {
-    this->container.reserve(input.size());
     this->container = input;
+}
+
+
+TokenContainer::TokenContainer(std::shared_ptr<TokenContainer> container)
+{
+    this->container = container->getVector();
 }
 std::shared_ptr<Token> TokenContainer::front()
 {
@@ -89,7 +91,7 @@ void TokenContainer::removeParens()
     }
 }
 
-std::vector<std::shared_ptr<Token>> TokenContainer::getVector()
+std::vector<std::shared_ptr<Token>> TokenContainer::getVector() const
 {
     return this->container;
 }

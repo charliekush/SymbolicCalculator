@@ -1,11 +1,21 @@
 #include "token_vector.hpp"
-
+#include "token_queue.hpp"
 #include <stdexcept>
 
 
+
 TokenVector::TokenVector(TokenContainer input)
+    : TokenContainer(input) {}
+
+TokenVector::TokenVector(const TokenQueue& tokenQueue)
+    : TokenContainer(tokenQueue.getVector()) {}
+TokenVector::TokenVector(std::shared_ptr<TokenContainer> container)
 {
-    this->container = input.getVector();
+    this->container = container->getVector();
+}
+TokenVector::operator TokenQueue() const
+{
+    return TokenQueue(container);  // Convert internal container to TokenQueue
 }
 
 std::shared_ptr<Token>& TokenVector::operator[](int index)

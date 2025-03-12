@@ -151,6 +151,14 @@ public:
     std::shared_ptr<Token> getToken();
 
     /**
+     * @brief Gets the precedence of the token represented by this node.
+     *
+     * @return The SymbolProperties of the node's token.
+     */
+    int getPrecedence();
+    
+
+    /**
      * @brief Gets the type of the token represented by this node.
      *
      * @return The TokenType of the node's token.
@@ -213,17 +221,20 @@ public:
     void replaceWithRightChild();
     void replaceWithLeftChild();
     std::string getFullStr();
-    std::vector<std::shared_ptr<ExpressionNode>>
-        getLeaves(std::shared_ptr<ExpressionNode> root);
+    static std::vector<std::shared_ptr<ExpressionNode>>
+        getLeaves(std::shared_ptr<ExpressionNode>& root);
     std::shared_ptr<ExpressionNode> copyTree();
-    void replaceNode(std::shared_ptr<ExpressionNode> newNode);
+    void copyNode(std::shared_ptr<ExpressionNode> src);
+    void printTree(int depth = 0);
+    void printFuncTree(std::shared_ptr<Function> func, int depth);
 protected:
     std::shared_ptr<Token> token;
     std::weak_ptr<ExpressionNode> parent;
     std::shared_ptr<ExpressionNode> leftChild;
     std::shared_ptr<ExpressionNode> rightChild;
     std::shared_ptr<ExpressionNode> derivative;
-    void getLeavesHelper(std::shared_ptr<ExpressionNode> node,
+    
+    static void getLeavesHelper(std::shared_ptr<ExpressionNode> node,
                 std::vector<std::shared_ptr<ExpressionNode>>& leaves);
     
     

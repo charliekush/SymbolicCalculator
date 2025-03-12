@@ -98,11 +98,7 @@ TokenVector Tokenizer::tokenize()
             }
         }
     }
-    for (this->tokensIdx = 0; this->tokensIdx < this->output.size();
-                                                    this->tokensIdx++)
-    {
-        this->nextImplicit();
-    }
+    this->nextImplicit(this->output);
     return this->output;
 }
 std::shared_ptr<Token> Tokenizer::currentToken()
@@ -559,44 +555,41 @@ void Tokenizer::fixEulers()
 }
 
 
-void Tokenizer::nextImplicit()
+void Tokenizer::nextImplicit(TokenVector& vec)
 {
-
-    if (this->tokensIdx + 1 < this->output.size())
+    int implicitIdx = 0;
+    for (; implicitIdx < vec.size(); implicitIdx++)
     {
-        
-        TokenType currentType = this->currentToken()->getType();
-        TokenType nextType = this->output[this->tokensIdx + 1]->getType();
+        auto token = vec[implicitIdx];
+        TokenType currentType = token->getType();
+
+        if (currentType == TokenType::FUNCTION)
+        {
+            auto func = std::dynamic_pointer_cast<Function>(token);
+            TokenVector vec(func->getSubExpr());
+            this->nextImplicit(vec);
+            
+
+            func->setSubExpr(std::make_shared<TokenQueue>(vec));
+            vec[implicitIdx] = func;
+
+        }
+        if (implicitIdx + 1 >= vec.size())
+        {
+            break;
+        }
+        TokenType nextType = vec[implicitIdx + 1]->getType();
         if (Lookup::implicitMultiplication.find(
             {currentType, nextType })
                 != Lookup::implicitMultiplication.end())
         {
             if (Lookup::implicitMultiplication[{currentType, nextType}])
             {
-                this->output.emplace(this->tokensIdx + 1,
+                vec.emplace(implicitIdx + 1,
                                     std::make_shared<Operator>("*"));
             }
         }
-        else
-        {
-            try
-            {
-                std::string msg = "Types " +
-                    Lookup::getTokenType(this->currentToken()->getType()) +
-                    " and " +
-                    Lookup::getTokenType(nextType) +
-                    " should not be next to each other. Found at " +
-                    this->currentToken()->getFullStr() +
-                    " and " +
-                    this->output[this->tokensIdx + 1]->getFullStr() + "\n";
-
-            }
-            catch (const std::exception& e)
-            {
-                std::cerr << e.what() << '\n';
-            }
-
-        }
+        
     }
 
 

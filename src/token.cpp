@@ -13,6 +13,7 @@
 #include "lookup.hpp"
 #include "token_queue.hpp"
 
+#include <stdexcept>
 
  /**
   * @brief Constructs a Token with specified type and string.

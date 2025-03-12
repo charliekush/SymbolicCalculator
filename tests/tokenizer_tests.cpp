@@ -12,7 +12,6 @@
 #include "token_vector.hpp"
 #include "lookup.hpp"
 
-#include "test_definitions.hpp"
 
 #include <gtest/gtest.h>
 #include <iostream>

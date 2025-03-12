@@ -1,6 +1,18 @@
 #include "token_queue.hpp"
+#include "token_vector.hpp"
 
+TokenQueue::TokenQueue(TokenContainer container)
+{
+    this->container = container.getVector();
+}
 
+TokenQueue::TokenQueue(const TokenVector& tokenVector)
+    : TokenContainer(tokenVector.getVector()) {}
+
+TokenQueue::operator TokenVector() const
+{
+    return TokenVector(container);  // Convert internal container to TokenVector
+}
 
 void TokenQueue::push(std::shared_ptr<Token> token)
 {

@@ -8,9 +8,12 @@
 #include "expression_node.hpp"
 #include "token.hpp"
 #include "token_queue.hpp"
+#include "tree_fixer.hpp"
+#include "latex_converter.hpp"
 
 #include <memory>
 #include <string>
+#include <iostream>
 
  /**
   * @brief Default constructor for ExpressionNode.
@@ -105,6 +108,10 @@ TokenType ExpressionNode::getType()
     return this->token->getType();
 }
 
+int ExpressionNode::getPrecedence()
+{
+    return this->token->getPrecedence();
+}
 /**
  * @brief Gets the associativity of the token represented by this node.
  *
@@ -132,7 +139,10 @@ std::string ExpressionNode::getStr()
  */
 void ExpressionNode::setParent(std::weak_ptr<ExpressionNode> parent)
 {
-    this->parent = parent;
+    if(this)
+    {
+        this->parent = parent;
+    }
 }
 
 /**
@@ -174,13 +184,9 @@ std::shared_ptr<ExpressionNode> ExpressionNode::removeRightChild()
 std::shared_ptr<ExpressionNode> ExpressionNode::setLeft(
                         std::shared_ptr<ExpressionNode> node)
 {
-    if (this->leftChild == nullptr)
-    {
-        this->leftChild = node;
-        this->leftChild->setParent(weak_from_this());
-        return this->leftChild;
-    }
-    return nullptr;
+    this->leftChild = node;
+    this->leftChild->setParent(weak_from_this());
+    return this->leftChild;
 }
 
 /**
@@ -196,13 +202,9 @@ std::shared_ptr<ExpressionNode> ExpressionNode::setLeft(
 std::shared_ptr<ExpressionNode> ExpressionNode::setRight(
                             std::shared_ptr<ExpressionNode> node)
 {
-    if (this->rightChild == nullptr)
-    {
-        this->rightChild = node;
-        this->rightChild->setParent(weak_from_this());
-        return this->rightChild;
-    }
-    return nullptr;
+   this->rightChild = node;
+    this->rightChild->setParent(weak_from_this());
+    return this->rightChild;
 }
 
 /**
@@ -288,7 +290,7 @@ bool ExpressionNode::hasVariable(const std::shared_ptr<Variable> var)
 std::shared_ptr<ExpressionNode> ExpressionNode::setDerivative(
                             std::shared_ptr<ExpressionNode> node)
 {
-    this->derivative = node;
+    this->derivative = node;//TreeFixer::simplify(node);
     return this->derivative;
 }
 
@@ -318,34 +320,7 @@ bool ExpressionNode::isLeaf()
     return (!this->getLeft() && !this->getRight());
 }
 
-void ExpressionNode::replaceWithLeftChild() {
-    // Get the left child
-    std::shared_ptr<ExpressionNode> left = this->getLeft();
-    if (!left)
-    {
-        return;
-    }
-    this->setToken(left->getToken());
-    this->setDerivative(left->getDerivative());
-    this->setLeft(left->getLeft());
-    this->setRight(left->getRight());
-}
 
-void ExpressionNode::replaceWithRightChild() {
-    // Get the right child
-    std::shared_ptr<ExpressionNode> right = this->getRight();
-
-    // If there is no right child, just return
-    if (!right)
-    {
-        return;
-    }
-
-    this->setToken(right->getToken());
-    this->setDerivative(right->getDerivative());
-    this->setLeft(right->getLeft());
-    this->setRight(right->getRight());
-}
 
 
 
@@ -357,10 +332,10 @@ void ExpressionNode::replaceWithRightChild() {
  * @return shared pointers to the leaves of the tree
  */
 std::vector<std::shared_ptr<ExpressionNode>>
-    ExpressionNode::getLeaves(std::shared_ptr<ExpressionNode> root)
+    ExpressionNode::getLeaves(std::shared_ptr<ExpressionNode>& root)
 {
     std::vector<std::shared_ptr<ExpressionNode>> leaves;
-    this->getLeavesHelper(root, leaves);
+    getLeavesHelper(root, leaves);
     return leaves;
 }
 void ExpressionNode::getLeavesHelper(std::shared_ptr<ExpressionNode> node,
@@ -378,8 +353,8 @@ void ExpressionNode::getLeavesHelper(std::shared_ptr<ExpressionNode> node,
     }
 
     // Recursively gather leaves from the left and right subtrees
-    this->getLeavesHelper(node->getLeft(), leaves);
-    this->getLeavesHelper(node->getRight(), leaves);
+    getLeavesHelper(node->getLeft(), leaves);
+    getLeavesHelper(node->getRight(), leaves);
 }
 
 
@@ -387,8 +362,7 @@ std::string ExpressionNode::getFullStr()
 {
     if (this->getType() == TokenType::FUNCTION)
     {
-        return std::dynamic_pointer_cast<Function>
-                        (this->getToken())->getFullStr();
+        return LaTeXConverter::convertToLaTeX(weak_from_this().lock());
     }
     if (this->getType() == TokenType::VARIABLE)
     {
@@ -401,20 +375,115 @@ std::string ExpressionNode::getFullStr()
 
 std::shared_ptr<ExpressionNode> ExpressionNode::copyTree()
 {
-    auto copyNode = std::make_shared<ExpressionNode>(this->token);
+    auto copy = std::make_shared<ExpressionNode>(this->token);
     if (this->getLeft())
     {
-        copyNode->setLeft(this->getLeft()->copyTree());
+        copy->setLeft(this->getLeft()->copyTree());
     }
     if (this->getRight())
     {
-        copyNode->setRight(this->getRight()->copyTree());
+        copy->setRight(this->getRight()->copyTree());
     }
     
     if (this->getDerivative())
     {
-        copyNode->setDerivative(this->getDerivative());
+        copy->setDerivative(this->getDerivative());
     }
-    return copyNode;
+    return copy;
+}
+void ExpressionNode::copyNode(std::shared_ptr<ExpressionNode> src)
+{
+    this->setToken(src->getToken());
+    this->setDerivative(src->getDerivative());
+    this->setLeft(src->getLeft());
+    this->setRight(src->getRight());
+
+    
+}
+void ExpressionNode::printFuncTree(std::shared_ptr<Function> func, int depth)
+{
+    std::string indent(depth * 6, ' ');  // Indentation for the function and operator
+
+    // Get the subexpression tree (e.g., x + 2 or another function like cos(x))
+    auto subTree = func->getSubExprTree();
+
+    if (subTree)
+    {
+        // Check if the subtree root is another function
+        if (subTree->getType() == TokenType::FUNCTION)
+        {
+            auto nestedFunc = std::dynamic_pointer_cast<Function>(subTree->getToken());
+            if (nestedFunc)
+            {
+                // Recursively print the nested function tree with increased depth
+                this->printFuncTree(nestedFunc, depth + 1);
+            }
+        }
+        else
+        {
+            // Regular handling for non-function subtrees (e.g., x + 2)
+            auto rightChild = subTree->getRight();
+            auto leftChild = subTree->getLeft();
+
+            // Print the right child first (which will appear above the function/operator)
+            if (rightChild)
+            {
+                rightChild->printTree(depth + 1);  // Print right child slightly indented
+            }
+
+            // Print the function name along with the operator below it
+            std::cout << indent << func->getStr() << "     " << subTree->getFullStr() << std::endl;
+
+            // Print the left child after the operator and function (which appears below)
+            if (leftChild)
+            {
+                leftChild->printTree(depth + 1);  // Print left child slightly indented
+            }
+        }
+    }
 }
 
+
+
+void ExpressionNode::printTree(int depth)
+{
+    std::string indent(depth * 6, ' ');
+
+    // Check if the node represents a function
+    if (this->getType() == TokenType::FUNCTION)
+    {
+        auto func = std::dynamic_pointer_cast<Function>(this->getToken());
+        if (func)
+        {
+            // Call printFuncTree to handle function tokens
+            this->printFuncTree(func, depth);
+        }
+    }
+    else
+    {
+        // Increase the indentation for deeper levels
+        auto rightChild = this->getRight();
+        auto leftChild = this->getLeft();
+
+        // Print the right child first (appears on top)
+        if (rightChild)
+        {
+            rightChild->printTree(depth + 1);
+        }
+
+        // Print the current node
+        std::cout << indent << getFullStr() << std::endl;
+
+        // Print the left child last (appears on the bottom)
+        if (leftChild)
+        {
+            leftChild->printTree(depth + 1);
+        }
+    }
+
+    // Print a separator when finished printing the whole tree (depth = 0)
+    if (depth == 0)
+    {
+        std::cout << "\n\n";
+    }
+}

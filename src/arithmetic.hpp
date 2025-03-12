@@ -12,7 +12,9 @@ class Arithmetic
     typedef std::shared_ptr<ExpressionNode> nodePtr;
     typedef std::shared_ptr<Number> numPtr;
     typedef std::function<double(double, double)> operation;
+    
 public:
+    static bool floatSimplification;
     static numPtr performOperation(const operation& op, numPtr left, 
                                 numPtr right, bool isDivision);
     static numPtr power(nodePtr operatorNode, numPtr left, numPtr right);
@@ -22,38 +24,20 @@ public:
     static numPtr subtract(nodePtr operatorNode, numPtr left, numPtr right);
     static void simplify(nodePtr operatorNode, numPtr left, numPtr right);
     
-    static void simplifyExponent(nodePtr operatorNode);
-    static void simplifyMultiplication(nodePtr operatorNode);
-    static void simplifyDivision(nodePtr operatorNode);
-    static void simplifyAddition(nodePtr operatorNode);
-    static void simplifySubtraction(nodePtr operatorNode);
+    static void simplifyExponent(nodePtr& operatorNode);
+    static void simplifyMultiplication(nodePtr& operatorNode);
+    static void simplifyDivision(nodePtr& operatorNode);
+    static void simplifyAddition(nodePtr& operatorNode);
+    static void simplifySubtraction(nodePtr& operatorNode);
 
     static numPtr getNumberToken(const nodePtr& node);
-    static void setNodeToZero(nodePtr operatorNode);
-    static void setNodeToOne(nodePtr operatorNode);
-    
-    
+    static void setNodeToZero(nodePtr& operatorNode);
+    static void setNodeToOne(nodePtr& operatorNode);
+
 };
 
 
-class Operation
-{
-    typedef std::shared_ptr<ExpressionNode> nodePtr;
-    
-public:
-    static nodePtr times(nodePtr left, nodePtr right);
-    static nodePtr divide(nodePtr left, nodePtr right);
-    static nodePtr add(nodePtr left, nodePtr right);
-    static nodePtr subtract(nodePtr left, nodePtr right);
-    static nodePtr power(nodePtr left, nodePtr right);
-};
 
-class TreeFixer
-{   
-    typedef std::shared_ptr<ExpressionNode> nodePtr;
-public:
-    static void checkTree(nodePtr node);
-    static nodePtr expandNegative(nodePtr node);
-    static void checkChildren(nodePtr node);
-};
+
+
 #endif // __CALCULATOR_HPP__

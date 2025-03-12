@@ -1,5 +1,6 @@
 #include "function_defs.hpp"
-#include "calculator.hpp"
+#include "arithmetic.hpp"
+#include "operation.hpp"
 
 #include <cmath>
 
